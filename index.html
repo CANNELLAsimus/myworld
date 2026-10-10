@@ -145,6 +145,7 @@ h4{margin:10px 0 4px;font-size:14px;color:var(--yel)}
 </div>
 <div class="modal" id="modal"><div class="box"><b id="mt"></b><p id="mp"></p><div class="acts"><button class="gray" id="no">Отмена</button><button class="danger" id="yes">Да, сбросить</button></div></div></div>
 <div class="qd" id="qd"><b>💬 Цитата дня</b><span id="qt"></span></div>
+<div class="modal" id="pm"><div class="box"><b>🏞️ Водоём</b><p id="pmi"></p><p>Угадай, что выпадет:</p><div class="acts"><button id="pf">🐟 Рыба</button><button id="pe">🦅 Орёл</button></div><p id="pmr"></p><div class="acts"><button class="gray" id="px">Обменять 1 🐟 на 5% денег</button></div><div class="acts"><button class="gray" id="pc">Закрыть</button></div></div></div>
 <div class="toast" id="toast"></div>
 <script>
 const $=id=>document.getElementById(id);
@@ -152,7 +153,7 @@ const IT={
 town:{c:'ind',n:'Ратуша',e:'🏛️',d:'Нужна для всех покупок. Сама даёт +2 💰/с и 2 рабочих места (+1.5 💰/с за работника)',b:{money:100},g:1,max:1,slots:2,per:1.5,res:'money'},
 rod:{c:'ind',n:'Громоотвод',e:'🗼',d:'Принимает на себя молнию, выдерживает столько ударов, какой у него уровень (старт 2, максимум 4). Нажми на громоотвод, чтобы улучшить',b:{money:400,wood:30,stone:60},g:1.3,max:3},
 lodge:{c:'ind',n:'Охотничья хижина',e:'🛖',d:'Дом на 2 охотников, которые прогоняют медведей',b:{money:700,wood:120,stone:60},g:1.5},
-pond:{c:'ind',n:'Водоём',e:'🏞️',d:'Перетащи на него рыбака, и тот будет ловить бесплатную рыбу 🐟. Чем больше рыбаков, тем быстрее улов',b:{money:600,wood:100,stone:60},g:1.5},
+pond:{c:'ind',n:'Водоём',e:'🏞️',d:'До 3 рыбаков (перетащи рыбака на водоём) ловят бесплатную рыбу 🐟. Нажми на водоём: угадай рыба или орёл (+2 🐟 или −5% денег) и обменивай рыбу на деньги (1 🐟 = 5% баланса)',b:{money:600,wood:100,stone:60},g:1.5},
 fence:{c:'ind',n:'Забор',e:'🚧',d:'Защита от медведей: он ломает от 1 до 3 заборов в зоне своего зрения, а пока заборы есть, жителей не трогает',b:{wood:60},g:1.1,max:30,s:1},
 hut:{c:'ind',n:'Здание строителей',e:'🏗️',d:'+20% к доходу и открывает аттракционы (до 3 шт.)',b:{money:800,wood:120,stone:80},g:2.8,max:3},
 workshop:{c:'ind',n:'Мастерская',e:'🛠️',d:'3 рабочих места, +2 💰/с за работника. Жителей назначают перетаскиванием на здание',b:{money:500,wood:60},g:1.4,slots:3,per:2,res:'money'},
@@ -176,7 +177,7 @@ man:{c:'ppl',n:'Мужчина',e:'👨',d:'Работает на предпри
 woman:{c:'ppl',n:'Женщина',e:'👩',d:'Работает на предприятии (назначается перетаскиванием). Нужны жильё, вода, газ, еда и развлечения',b:{money:250},g:1.15,ppl:1},
 child:{c:'ppl',n:'Ребёнок',e:'🧒',d:'Не работает, но нужен семье. Нужны жильё, вода, газ и еда',b:{money:150},g:1.15,ppl:1},
 hunter:{c:'ppl',n:'Охотник',e:'🏹',d:'Нужна только еда: ЖКХ и аттракционы не нужны. Сам идёт к медведю в зоне зрения, шансы 50 на 50. Нужна свободная хижина',b:{money:600},g:1.2,ppl:1},
-fisher:{c:'ppl',n:'Рыбак',e:'🎣',d:'Ловит рыбу в водоёме (перетащи его на водоём; привязан только к одному). Ему ничего не нужно. Нужен водоём',b:{money:300},g:1.2,ppl:1},
+fisher:{c:'ppl',n:'Рыбак',e:'🎣',d:'Ловит рыбу в водоёме (перетащи его на водоём, максимум 3 на водоём; привязан только к одному). Ему ничего не нужно. Нужен водоём',b:{money:300},g:1.2,ppl:1},
 pet:{c:'ppl',n:'Питомец',e:'🐶',d:'Ест только корм. Без дома: перетащи на жителя, чтобы привязать',b:{money:200},g:1.15,ppl:1}};
 const CATS=[['ind','🏭 Промышленность'],['att','🎢 Аттракционы'],['food','🍞 Продукты'],['util','🚰 ЖКХ'],['ppl','🧑 Люди'],['fam','👨‍👩‍👧 Семьи']];
 const NAMES={
@@ -189,6 +190,7 @@ const ICO={fish:'🐟',owner:'🔗',hurt:'🩹',bread:'🍞',meat:'🍖',milk:'�
 NAMES.hunter=NAMES.man;NAMES.fisher=NAMES.man;
 const BVIEW=230,LIMIT=480,WHY={food:'голод',house:'нет дома, холод',water:'нет воды',gas:'нет газа'};
 const QUOTES=['Маленький шаг сегодня лучше большого плана завтра.', 'Каждая великая деревня начиналась с одного забора.', 'Упорство важнее таланта, когда талант отдыхает.', 'Не торопись — главное, чтобы ты двигался вперёд.', 'Сегодня отличный день, чтобы построить что-то новое.', 'Ошибка — это просто урок в красивой упаковке.', 'Чем больше дел начато, тем меньше шансов остаться на месте.', 'Терпение — это тоже работа.', 'Сильная команда начинается с одного доброго слова.', 'Не жди идеального момента — создай его.', 'Даже самый длинный путь состоит из обычных шагов.', 'Тот, кто копает глубже, находит больше.', 'Береги тех, кто рядом: они — твой главный ресурс.', 'Порядок в маленьком — спокойствие в большом.', 'Если трудно, значит, ты растёшь.', 'Хорошая идея любит действие.', 'Улыбнись: твоя деревня сегодня станет чуть лучше.', 'Лучшее время начать — сейчас.', 'Победа любит тех, кто не сдаётся после первой неудачи.', 'Умей отдыхать, но не забывай возвращаться к делу.', 'Знания — как инструменты: чем чаще используешь, тем острее.', 'Не сравнивай свой первый день с чужим сотым.', 'Доброта ничего не стоит, но многое меняет.', 'Каждый день — чистая страница.', 'Смелость — это делать шаг, даже когда страшно.', 'Кто ищет возможности, тот их находит.', 'Хороший лидер сначала заботится о людях.', 'Трудности временны, опыт остаётся навсегда.', 'Маленькие привычки строят большие результаты.', 'Не бойся менять план, бойся не иметь цели.', 'Тишина и труд рождают лучшие идеи.', 'Сегодня ты на шаг ближе к цели, чем вчера.', 'Секрет успеха — продолжать, когда другие остановились.', 'Береги время: оно строит больше, чем деньги.', 'Мечтай масштабно, действуй по шагам.', 'Дружба — самое надёжное здание в любой деревне.', 'Тот, кто учится, никогда не проигрывает полностью.', 'Спокойствие помогает увидеть решение там, где другие видят проблему.', 'Начни с малого — и продолжай до большого.', 'Чем крепче основа, тем выше можно строить.', 'Благодарность делает любой день светлее.', 'Верь в свой план и не забывай его проверять.'];
+const POND='<svg viewBox="0 0 100 70" width="104" height="73"><path d="M10 38C6 20 26 7 46 11C60 3 87 9 91 30C99 45 81 63 58 60C44 69 19 63 10 38Z" fill="#1e5fa8" stroke="#7cc4ff" stroke-width="3"/><path d="M26 28C34 20 48 20 56 25" fill="none" stroke="#b6e1ff" stroke-width="3" stroke-linecap="round" opacity=".7"/><path d="M52 44C60 40 72 41 78 46" fill="none" stroke="#b6e1ff" stroke-width="2.5" stroke-linecap="round" opacity=".5"/></svg>';
 const KEY='village-clicker-v3';
 const fresh=()=>({money:150,wood:20,stone:0,pick:1,axe:1,ents:[],fams:[],nid:1,peak:0,up:{rod:2,house:4,factory:5},land:{'0,1':1},auto:false,autoOn:false,ban:0,lbDay:'',quoteDay:'',banFix:1,food:{bread:0,meat:0,milk:0,fish:0,petfood:0}});
 let D=fresh();
@@ -237,7 +239,7 @@ function spawnPos(){const cx=(vp.scrollLeft+vp.clientWidth/2)/Math.max(1,field.o
  const[c,r]=k.split(',').map(Number);return{x:c*50+6+Math.random()*38,y:r*50+4+Math.random()*20}}
 function mkEnt(e){const d=IT[e.k],el=document.createElement('div');
  el.className='ent'+(d.s?' sm':'')+(d.ppl?' p':'');el.dataset.id=e.id;el.dataset.k=e.k;
- el.innerHTML=`<span class="em">${d.e}</span>${d.slots||d.svc||e.k==='house'||e.k==='rod'||e.k==='pond'?'<span class="wk"></span>':''}`+(d.ppl?`<span class="bub"></span><span class="jb"></span><i class="nm">${e.name}</i>`:'');
+ el.innerHTML=`<span class="em">${e.k==='pond'?POND:d.e}</span>${d.slots||d.svc||e.k==='house'||e.k==='rod'||e.k==='pond'?'<span class="wk"></span>':''}`+(d.ppl?`<span class="bub"></span><span class="jb"></span><i class="nm">${e.name}</i>`:'');
  placeEl(el,e);field.appendChild(el);nodes[e.id]=el}
 function spawn(k){const d=IT[k],e={id:D.nid++,k,...spawnPos()};
  if(d.ppl){e.name=NAMES[k][Math.random()*NAMES[k].length|0];e.hunger=100;e.fun=60+Math.random()*40;e.fr=.1+Math.random()*.12;e.want=pickWant(k);if(k!=='pet')e.grace=180}
@@ -312,7 +314,17 @@ function assignJob(e,j){const d=IT[j.k];
  if(e.job===j.id){e.job='none';return toast(e.name+' больше не работает: '+d.n)}
  if(D.ents.filter(p=>p!==e&&p.job===j.id).length>=slotsOf(j))return toast(d.n+': нет свободных мест ('+slotsOf(j)+')');
  e.job=j.id;toast('🔨 '+e.name+' теперь работает: '+d.n)}
-function bindPond(e,p){if(e.k!=='fisher')return toast('Рыбачить могут только рыбаки');e.pond=p.id;toast('🎣 '+e.name+' теперь ловит рыбу в этом водоёме')}
+let pondAns='fish';
+function pondInfo(){$('pmi').textContent='Рыбы на складе: '+D.food.fish+' 🐟 · Баланс: '+fmt(D.money)+' 💰'}
+function openPond(){pondAns=Math.random()<.5?'fish':'eagle';$('pmr').textContent='';pondInfo();$('pm').classList.add('on')}
+function pondGuess(g){const was=pondAns;pondAns=Math.random()<.5?'fish':'eagle';const nm=was==='fish'?'рыба':'орёл';
+ if(g===was){D.food.fish+=2;$('pmr').textContent='✅ Угадал! Выпал '+nm+'. +2 🐟'}
+ else{const loss=Math.floor(D.money*.05);D.money-=loss;$('pmr').textContent='❌ Не угадал: выпал '+nm+'. −5% баланса (−'+fmt(loss)+' 💰)'}
+ pondInfo()}
+function pondSell(){if(D.food.fish<1)return toast('У тебя нет рыбы');const g=Math.max(1,Math.floor(D.money*.05));D.food.fish--;D.money+=g;$('pmr').textContent='💱 Обменял 1 🐟 на '+fmt(g)+' 💰';pondInfo()}
+function bindPond(e,p){if(e.k!=='fisher')return toast('Рыбачить могут только рыбаки');
+ if(e.pond!==p.id&&D.ents.filter(o=>o.k==='fisher'&&o.pond===p.id).length>=3)return toast('У водоёма уже 3 рыбака — это максимум');
+ e.pond=p.id;toast('🎣 '+e.name+' теперь ловит рыбу в этом водоёме')}
 function meet(a,b){
  if(a.k==='pet'){
   if(b.k==='pet')return toast('Питомца можно привязать только к жителю');
@@ -535,6 +547,7 @@ const endDrag=(e,drop)=>{if(!drag)return;const{el,ent,ox,oy,cx,cy}=drag;drag=nul
  if(drop&&overTrash(e)){const d=IT[ent.k];
   ask('Удалить '+(d.ppl?ent.name:d.n)+'?','Деньги и ресурсы, потраченные на покупку, не вернутся.','Удалить',()=>{if(D.ents.includes(ent))deleteEnt(ent)},()=>{ent.x=ox;ent.y=oy;if(nodes[ent.id])placeEl(nodes[ent.id],ent)});return}
 
+ if(drop&&ent.k==='pond'&&Math.hypot(e.clientX-cx,e.clientY-cy)<8){openPond();return}
  if(drop&&UPG[ent.k]&&Math.hypot(e.clientX-cx,e.clientY-cy)<8&&!(ev.burn&&ev.burn.id===ent.id)){upgradeAsk(ent);return}
  if(drop&&!D.land[(ent.x<50?0:1)+','+(ent.y<50?0:1)]){ent.x=ox;ent.y=oy;placeEl(el,ent);toast('🔒 Эта территория не куплена');return}
  if(!drop||!IT[ent.k].ppl)return;
@@ -562,6 +575,10 @@ document.addEventListener('click',e=>{
  if(e.target.id==='yes'){const f=modalYes;modalYes=modalNo=null;$('modal').classList.remove('on');if(f)f();return}
  if(e.target.id==='no'||e.target.id==='modal'){const f=modalNo;modalYes=modalNo=null;$('modal').classList.remove('on');if(f)f();return}
  if(e.target.id==='autoBtn'){autoClick();return}
+ if(e.target.id==='pf'){pondGuess('fish');return}
+ if(e.target.id==='pe'){pondGuess('eagle');return}
+ if(e.target.id==='px'){pondSell();return}
+ if(e.target.id==='pc'||e.target.id==='pm'){$('pm').classList.remove('on');return}
  const bl=e.target.closest('.buyland');if(bl){buyLand(bl.dataset.land);return}
  const bn=e.target.closest('.ent.burn');if(bn&&ev.burn){endBurn(true);return}
  const nb=e.target.closest('.nav button');
