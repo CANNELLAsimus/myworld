@@ -73,7 +73,7 @@ h4{margin:10px 0 4px;font-size:14px;color:var(--yel)}
 .ent.burn::after{content:'🔥';position:absolute;left:50%;top:-18px;transform:translateX(-50%);font-size:28px;animation:fl .35s infinite alternate;pointer-events:none}
 .ent.burn .em{filter:drop-shadow(0 0 8px #f97316) brightness(.8)}
 @keyframes fl{to{transform:translateX(-50%) scale(1.25) rotate(8deg)}}
-.bear{position:absolute;font-size:46px;line-height:1;transform:translate(-50%,-50%);transition:left 10s linear,top 10s linear;z-index:900;pointer-events:none;filter:drop-shadow(0 3px 3px #000a)}
+.bear{position:absolute;font-size:46px;line-height:1;transform:translate(-50%,-50%);transition:left .2s linear,top .2s linear;z-index:900;pointer-events:none;filter:drop-shadow(0 3px 3px #000a)}
 .trash{position:absolute;top:8px;right:8px;width:46px;height:46px;border-radius:50%;background:var(--ui);border:2px dashed var(--bad);font-size:22px;display:flex;align-items:center;justify-content:center;z-index:30;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s}
 .trash.on{opacity:.95}.trash.hot{transform:scale(1.25);background:#450a0a;border-style:solid}
 .modal{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;z-index:200;padding:16px}
@@ -127,7 +127,7 @@ h4{margin:10px 0 4px;font-size:14px;color:var(--yel)}
   </div>
   <div class="stats"><span id="st"></span><button id="reset">сброс</button></div>
   <div class="stats" id="fd"><span>Склад — перетащи еду на жителя:</span><span id="tray"></span></div>
-  <div class="stats links"><a href="https://t.me/d0briChannel" target="_blank" rel="noopener">✈️ Telegram</a><a href="https://www.youtube.com/channel/UCrkSFsLzw1F71iqmQpQIxjg" target="_blank" rel="noopener">▶️ YouTube</a><button id="autoBtn"></button></div>
+  <div class="stats links"><a href="https://t.me/d0briChannel" target="_blank" rel="noopener">✈️ Telegram</a><a href="https://www.youtube.com/channel/UCrkSFsLzw1F71iqmQpQIxjg" target="_blank" rel="noopener">▶️ YouTube</a><button id="autoBtn"></button><button id="rideBtn"></button></div>
  </div>
  <main>
   <div id="village" class="screen on"><div id="world"></div></div>
@@ -153,6 +153,7 @@ const IT={
 town:{c:'ind',n:'Ратуша',e:'🏛️',d:'Нужна для всех покупок. Сама даёт +2 💰/с и 2 рабочих места (+1.5 💰/с за работника)',b:{money:100},g:1,max:1,slots:2,per:1.5,res:'money'},
 rod:{c:'ind',n:'Громоотвод',e:'🗼',d:'Принимает на себя молнию, выдерживает столько ударов, какой у него уровень (старт 2, максимум 4). Нажми на громоотвод, чтобы улучшить',b:{money:400,wood:30,stone:60},g:1.3,max:3},
 lodge:{c:'ind',n:'Охотничья хижина',e:'🛖',d:'Дом на 2 охотников, которые прогоняют медведей',b:{money:700,wood:120,stone:60},g:1.5},
+tent:{c:'util',n:'Палатка',e:'⛺',d:'Дом для 1 рыбака: 1 рыбак — 1 палатка. Без палатки рыбак живёт 4 минуты',b:{money:500},g:1},
 pond:{c:'ind',n:'Водоём',e:'🏞️',d:'До 3 рыбаков (перетащи рыбака на водоём) ловят бесплатную рыбу 🐟. Нажми на водоём: угадай рыба или орёл (+2 🐟 или −5% денег) и обменивай рыбу на деньги (10 🐟 = 6% баланса)',b:{money:600,wood:100,stone:60},g:1.5},
 fence:{c:'ind',n:'Забор',e:'🚧',d:'Защита от медведей: он ломает от 1 до 3 заборов в зоне своего зрения, а пока заборы есть, жителей не трогает',b:{wood:60},g:1.1,max:30,s:1},
 hut:{c:'ind',n:'Здание строителей',e:'🏗️',d:'+20% к доходу и открывает аттракционы (до 3 шт.)',b:{money:800,wood:120,stone:80},g:2.8,max:3},
@@ -177,7 +178,7 @@ man:{c:'ppl',n:'Мужчина',e:'👨',d:'Работает на предпри
 woman:{c:'ppl',n:'Женщина',e:'👩',d:'Работает на предприятии (назначается перетаскиванием). Нужны жильё, вода, газ, еда и развлечения',b:{money:250},g:1.15,ppl:1},
 child:{c:'ppl',n:'Ребёнок',e:'🧒',d:'Не работает, но нужен семье. Нужны жильё, вода, газ и еда',b:{money:150},g:1.15,ppl:1},
 hunter:{c:'ppl',n:'Охотник',e:'🏹',d:'Нужна только еда: ЖКХ и аттракционы не нужны. Сам идёт к медведю в зоне зрения, шансы 50 на 50. Нужна свободная хижина',b:{money:600},g:1.2,ppl:1},
-fisher:{c:'ppl',n:'Рыбак',e:'🎣',d:'Ловит рыбу в водоёме (перетащи его на водоём, максимум 3 на водоём; привязан только к одному). Ему ничего не нужно. Нужен водоём',b:{money:300},g:1.2,ppl:1},
+fisher:{c:'ppl',n:'Рыбак',e:'🎣',d:'Ловит рыбу в водоёме (перетащи на водоём, максимум 3 на водоём). Нужна палатка ⛺ (500 💰 на каждого), без неё живёт 4 минуты. Еда, ЖКХ и развлечения не нужны',b:{money:300},g:1.2,ppl:1},
 pet:{c:'ppl',n:'Питомец',e:'🐶',d:'Ест только корм. Без дома: перетащи на жителя, чтобы привязать',b:{money:200},g:1.15,ppl:1}};
 const CATS=[['ind','🏭 Промышленность'],['att','🎢 Аттракционы'],['food','🍞 Продукты'],['util','🚰 ЖКХ'],['ppl','🧑 Люди'],['fam','👨‍👩‍👧 Семьи']];
 const NAMES={
@@ -188,11 +189,12 @@ pet:['Бобик','Luna','Rex','Mochi','Simba','Tofu','Fluffy','Bruno','Kiki','S
 const TXT={owner:'Мне нужен хозяин — перетащи меня на жителя',hurt:'Я ранен после схватки с медведем',food:'Я голоден!',petfood:'Мне нечего есть!',house:'Мне холодно: нет дома!',water:'Нет воды!',gas:'Нет газа!',power:'Нет света!',fun:'Хочу эмоций — отведи меня на аттракцион!'};
 const ICO={fish:'🐟',owner:'🔗',hurt:'🩹',bread:'🍞',meat:'🍖',milk:'🥛',food:'🍞',petfood:'🦴',house:'🥶',water:'💧',gas:'🔥',power:'💡',fun:'🎢'};
 NAMES.hunter=NAMES.man;NAMES.fisher=NAMES.man;
-const BVIEW=230,LIMIT=480,WHY={food:'голод',house:'нет дома, холод',water:'нет воды',gas:'нет газа'};
+const BVIEW=230,LIMIT=480,WHY={tent:'нет палатки',food:'голод',house:'нет дома, холод',water:'нет воды',gas:'нет газа'};
 const QUOTES=['Маленький шаг сегодня лучше большого плана завтра.', 'Каждая великая деревня начиналась с одного забора.', 'Упорство важнее таланта, когда талант отдыхает.', 'Не торопись — главное, чтобы ты двигался вперёд.', 'Сегодня отличный день, чтобы построить что-то новое.', 'Ошибка — это просто урок в красивой упаковке.', 'Чем больше дел начато, тем меньше шансов остаться на месте.', 'Терпение — это тоже работа.', 'Сильная команда начинается с одного доброго слова.', 'Не жди идеального момента — создай его.', 'Даже самый длинный путь состоит из обычных шагов.', 'Тот, кто копает глубже, находит больше.', 'Береги тех, кто рядом: они — твой главный ресурс.', 'Порядок в маленьком — спокойствие в большом.', 'Если трудно, значит, ты растёшь.', 'Хорошая идея любит действие.', 'Улыбнись: твоя деревня сегодня станет чуть лучше.', 'Лучшее время начать — сейчас.', 'Победа любит тех, кто не сдаётся после первой неудачи.', 'Умей отдыхать, но не забывай возвращаться к делу.', 'Знания — как инструменты: чем чаще используешь, тем острее.', 'Не сравнивай свой первый день с чужим сотым.', 'Доброта ничего не стоит, но многое меняет.', 'Каждый день — чистая страница.', 'Смелость — это делать шаг, даже когда страшно.', 'Кто ищет возможности, тот их находит.', 'Хороший лидер сначала заботится о людях.', 'Трудности временны, опыт остаётся навсегда.', 'Маленькие привычки строят большие результаты.', 'Не бойся менять план, бойся не иметь цели.', 'Тишина и труд рождают лучшие идеи.', 'Сегодня ты на шаг ближе к цели, чем вчера.', 'Секрет успеха — продолжать, когда другие остановились.', 'Береги время: оно строит больше, чем деньги.', 'Мечтай масштабно, действуй по шагам.', 'Дружба — самое надёжное здание в любой деревне.', 'Тот, кто учится, никогда не проигрывает полностью.', 'Спокойствие помогает увидеть решение там, где другие видят проблему.', 'Начни с малого — и продолжай до большого.', 'Чем крепче основа, тем выше можно строить.', 'Благодарность делает любой день светлее.', 'Верь в свой план и не забывай его проверять.'];
 const POND='<svg viewBox="0 0 100 70" width="104" height="73"><path d="M10 38C6 20 26 7 46 11C60 3 87 9 91 30C99 45 81 63 58 60C44 69 19 63 10 38Z" fill="#1e5fa8" stroke="#7cc4ff" stroke-width="3"/><path d="M26 28C34 20 48 20 56 25" fill="none" stroke="#b6e1ff" stroke-width="3" stroke-linecap="round" opacity=".7"/><path d="M52 44C60 40 72 41 78 46" fill="none" stroke="#b6e1ff" stroke-width="2.5" stroke-linecap="round" opacity=".5"/></svg>';
+const FRM={carousel:1,circus:.75,ferris:.55,coaster:.4};
 const KEY='village-clicker-v3';
-const fresh=()=>({money:150,wood:20,stone:0,pick:1,axe:1,ents:[],fams:[],nid:1,peak:0,up:{rod:2,house:4,factory:5},land:{'0,1':1},auto:false,autoOn:false,ban:0,lbDay:'',quoteDay:'',banFix:1,food:{bread:0,meat:0,milk:0,fish:0,petfood:0}});
+const fresh=()=>({money:150,wood:20,stone:0,pick:1,axe:1,ents:[],fams:[],nid:1,peak:0,up:{rod:2,house:4,factory:5},land:{'0,1':1},auto:false,autoOn:false,autoRide:false,autoRideOn:false,ban:0,lbDay:'',quoteDay:'',banFix:1,food:{bread:0,meat:0,milk:0,fish:0,petfood:0}});
 let D=fresh();
 try{const s=JSON.parse(localStorage.getItem(KEY));if(s){const old=!s.land;D=Object.assign(fresh(),s);D.food=Object.assign(fresh().food,s.food);if(!s.banFix){D.ban=0;D.banFix=1}D.up=Object.assign({rod:2,house:4,factory:5},s.up);if(old){D.land={'0,1':1};(D.ents||[]).forEach(e=>{e.x=e.x/2;e.y=50+e.y/2})}}}catch(e){}
 D.ents=D.ents.filter(e=>IT[e.k]);
@@ -202,7 +204,7 @@ const fmt=n=>{n=Math.floor(n);return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e4?(n/1e3
 const fmt1=n=>n<10?n.toFixed(1):fmt(n);
 const counts=()=>{const c={};D.ents.forEach(e=>c[e.k]=(c[e.k]||0)+1);return c};
 const mult=()=>1+.2*(C.hut||0);
-const UPG={rod:{n:'Громоотвод',e:'🗼',max:4,costs:{3:1500,4:4000},d:l=>`выдерживает ${l} уд. молнии`},
+const UPG={rod:{n:'Громоотвод',e:'🗼',max:4,costs:{3:750,4:2000},d:l=>`выдерживает ${l} уд. молнии`},
  house:{n:'Жилой дом',e:'🏠',max:7,costs:{5:1500,6:2000,7:2200},d:l=>`прописка до ${l} человек`},
  factory:{n:'Завод',e:'🏭',max:10,costs:{6:3000,7:4500,8:7000,9:10000,10:15000},d:l=>`${l} рабочих мест`}};
 const LAND={'0,1':0,'1,1':4000,'0,0':4000,'1,0':10000},DIR={'1,1':'вправо','0,0':'вверх','1,0':'по диагонали'};
@@ -374,45 +376,48 @@ function strike(){if(D.money<2000)return;const t=burnable();if(!t.length||ev.bur
  toast(`🔥 ${IT[e.k].n} горит! −${ev.burn.rate} 💰/с. Потушить нельзя — огонь прогорит за 5 секунд`)}
 function endBurn(saved){const b=ev.burn;if(!b)return;if(nodes[b.id])nodes[b.id].classList.remove('burn');ev.burn=null;
  toast(saved?`💧 Пожар потушен! Сгорело ${fmt(b.lost)} 💰`:`Пожар прогорел. Сгорело ${fmt(b.lost)} 💰`)}
-function sendBear(){const fences=D.ents.filter(e=>e.k==='fence'),ppl=D.ents.filter(e=>IT[e.k].ppl);
- if(!fences.length&&!ppl.length)return;
- const hs0=D.ents.filter(e=>e.k==='hunter'),tg=fences.length?fences:(hs0.length?hs0:ppl),t=tg[Math.random()*tg.length|0];
- const el=document.createElement('div');el.className='bear';el.textContent='🐻';
- el.style.left=(t.x<50?-3:103)+'%';el.style.top=Math.max(5,Math.min(95,t.y+Math.random()*30-15))+'%';field.appendChild(el);
- requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.left=t.x+'%';el.style.top=t.y+'%'}));
- ev.bear={el,hp:3,t:10,tid:t.id,tx:t.x,ty:t.y,fight:null};
- toast(fences.length?'🐻 Медведь идёт ломать заборы! Охотники встретят его, если они есть':'🐻 Заборов нет — медведь идёт на жителей! Охотники встретят его, если они есть')}
-function bearHit(){const b=ev.bear,fr=field.getBoundingClientRect(),d=x=>Math.hypot((x.x-b.tx)*fr.width/100,(x.y-b.ty)*fr.height/100),inV=x=>d(x)<BVIEW;
- const fences=D.ents.filter(e=>e.k==='fence'&&inV(e)).sort((a,c)=>d(a)-d(c));
- if(fences.length){b.el.remove();ev.bear=null;const n=Math.min(fences.length,1+(Math.random()*3|0));fences.slice(0,n).forEach(removeEnt);
-  C=counts();toast(`🐻 Медведь сломал заборов: ${n}. Построй новые!`);if(shop)renderShop();return}
- const hs=D.ents.filter(e=>e.k==='hunter'&&!(e.hurt>0)&&nodes[e.id]&&inV(e)).sort((a,c)=>d(a)-d(c));
- if(hs.length){const r=b.el.getBoundingClientRect();return startFight(hs[0],r.left+r.width/2,r.top+r.height/2)}
- const ppl=D.ents.filter(e=>IT[e.k].ppl&&e.k!=='pet'&&inV(e)).sort((a,c)=>d(a)-d(c));
- b.el.remove();ev.bear=null;
- if(ppl.length)killPerson(ppl[0]);else toast('🐻 Медведь никого не увидел и ушёл')}
-function resumeBear(b){const t=Math.max(.5,b.t);b.el.style.transition=`left ${t}s linear,top ${t}s linear`;
- requestAnimationFrame(()=>requestAnimationFrame(()=>{b.el.style.left=b.tx+'%';b.el.style.top=b.ty+'%'}))}
-function startFight(h,bx,by){const b=ev.bear,fr=field.getBoundingClientRect();b.fight={h,t:2.5};
- b.el.style.transition='none';b.el.style.left=((bx-fr.left)/fr.width*100)+'%';b.el.style.top=((by-fr.top)/fr.height*100)+'%';
- b.el.classList.add('fight');nodes[h.id].classList.add('fight');
- pop(field,bx,by,'⚔️');toast('🏹 '+h.name+' вступил(а) в схватку с медведем! Шансы 50 на 50')}
+function petsAndRides(dt){
+ D.ents.forEach(e=>{if(e.k!=='pet'||(drag&&drag.ent===e)||!nodes[e.id])return;
+  e.wt=(e.wt||0)-dt;if(e.wt<=0){const nx=e.x+Math.random()*20-10,ny=e.y+Math.random()*20-10;
+   if(nx>3&&nx<97&&ny>5&&ny<95&&D.land[(nx<50?0:1)+','+(ny<50?0:1)]){e.tx=nx;e.ty=ny}e.wt=2+Math.random()*4}
+  if(e.tx!=null){const dx=e.tx-e.x,dy=e.ty-e.y,d=Math.hypot(dx,dy);if(d<.3)e.tx=null;else{const st=Math.min(d,2.2*dt);e.x+=dx/d*st;e.y+=dy/d*st;nodes[e.id].classList.add('walk');placeEl(nodes[e.id],e)}}});
+ if(!(D.autoRide&&D.autoRideOn))return;
+ const atts=D.ents.filter(e=>IT[e.k].fee);if(!atts.length)return;
+ const W=field.offsetWidth||1400,H=field.offsetHeight||1000;
+ D.ents.forEach(e=>{if(!IT[e.k].ppl||['pet','hunter','fisher'].includes(e.k)||(drag&&drag.ent===e)||!nodes[e.id])return;
+  const dist=a=>Math.hypot((a.x-e.x)*W/100,(a.y-e.y)*H/100);
+  if(e.ride){const a=D.ents.find(o=>o.id===e.ride.to);if(!a){e.ride=null;return}
+   if(e.ride.t==null){const d=dist(a);
+    if(d<36){e.ride.t=5+Math.random()*5;e.x=a.x;e.y=Math.min(95,a.y+4);placeEl(nodes[e.id],e)}
+    else{const k=Math.min(1,120*dt/d);e.x+=(a.x-e.x)*k;e.y+=(a.y-e.y)*k;nodes[e.id].classList.add('walk');placeEl(nodes[e.id],e)}}
+   else{e.ride.t-=dt;if(e.ride.t<=0){e.fun=100;e.frm=FRM[a.k]||1;D.money+=Math.round(IT[a.k].fee*mult());e.ride=null}}}
+  else if(e.fun<30){const a=atts.sort((p,q)=>dist(p)-dist(q))[0];e.ride={to:a.id,t:null}}})}
+function sendBear(){if(!D.ents.some(e=>e.k==='fence')&&!D.ents.some(e=>IT[e.k].ppl&&e.k!=='pet'))return;
+ const rows=Object.keys(D.land).filter(k=>D.land[k]).map(k=>+k.split(',')[1]),r=rows[Math.random()*rows.length|0];
+ const dir=Math.random()<.5?1:-1,x=dir>0?-3:103,y=r*50+8+Math.random()*34;
+ const el=document.createElement('div');el.className='bear';el.textContent='🐻';el.style.left=x+'%';el.style.top=y+'%';field.appendChild(el);
+ ev.bear={el,x,y,dir,t:35,fight:null};
+ toast('🐻 Медведь вышел из леса с '+(dir>0?'левой':'правой')+' стороны! Забор на его пути остановит его, а охотник перехватит')}
+function startFight(h){const b=ev.bear;b.fight={h,t:2.5};b.el.classList.add('fight');nodes[h.id].classList.add('fight');
+ const r=b.el.getBoundingClientRect();pop(field,r.left+r.width/2,r.top+r.height/2,'⚔️');toast('🏹 '+h.name+' вступил(а) в схватку с медведем! Шансы 50 на 50')}
 function endFight(){const b=ev.bear,h=b.fight.h;b.fight=null;if(nodes[h.id])nodes[h.id].classList.remove('fight');
  if(Math.random()<.5){b.el.remove();ev.bear=null;toast('🏹 '+h.name+' победил(а): медведь убежал в лес 🐻💨')}
- else{h.hurt=40;b.el.classList.remove('fight');b.t=Math.max(b.t,.5);resumeBear(b);toast('🩹 Медведь оказался сильнее: '+h.name+' ранен(а) на 40 секунд')}}
-function bearLogic(dt){const b=ev.bear,r=b.el.getBoundingClientRect(),fr=field.getBoundingClientRect();
- const bx=r.left+r.width/2,by=r.top+r.height/2;
+ else{h.hurt=40;b.el.classList.remove('fight');toast('🩹 Медведь оказался сильнее: '+h.name+' ранен(а) на 40 секунд')}}
+function bearLogic(dt){const b=ev.bear,W=field.offsetWidth||1400,H=field.offsetHeight||1000;
  if(b.fight){b.fight.t-=dt;if(b.fight.t<=0)endFight();return}
- b.t-=dt;let h=null,hd=1e9;
- D.ents.forEach(e=>{if(e.k!=='hunter'||e.hurt>0||!nodes[e.id]||(drag&&drag.ent===e))return;
-  const n=nodes[e.id].getBoundingClientRect(),d=Math.hypot(bx-(n.left+n.width/2),by-(n.top+n.height/2));if(d<hd){hd=d;h=e}});
- if(h&&hd<230){
-  if(hd<42)return startFight(h,bx,by);
-  const n=nodes[h.id].getBoundingClientRect(),k=Math.min(1,150*dt/hd);
-  h.x+=(bx-(n.left+n.width/2))*k/fr.width*100;h.y+=(by-(n.top+n.height/2))*k/fr.height*100;
-  nodes[h.id].classList.add('walk');placeEl(nodes[h.id],h)}
- if(b.t<=0)bearHit()}
+ b.t-=dt;
+ let h=null,hd=1e9;D.ents.forEach(e=>{if(e.k!=='hunter'||e.hurt>0||!nodes[e.id]||(drag&&drag.ent===e))return;const d=Math.hypot((e.x-b.x)*W/100,(e.y-b.y)*H/100);if(d<hd){hd=d;h=e}});
+ if(h&&hd<BVIEW){if(hd<42)return startFight(h);const k=Math.min(1,150*dt/hd);h.x+=(b.x-h.x)*k;h.y+=(b.y-h.y)*k;nodes[h.id].classList.add('walk');placeEl(nodes[h.id],h)}
+ let tg=null,td=1e9;D.ents.forEach(e=>{if(!IT[e.k].ppl||e.k==='pet')return;const d=Math.hypot((e.x-b.x)*W/100,(e.y-b.y)*H/100);if(d<td){td=d;tg=e}});
+ let vx=b.dir,vy=0;if(tg&&td<BVIEW){const n=Math.max(1,td);vx=(tg.x-b.x)*W/100/n;vy=(tg.y-b.y)*H/100/n}
+ const fa=D.ents.filter(e=>{if(e.k!=='fence')return false;const dx=(e.x-b.x)*W/100,dy=(e.y-b.y)*H/100,al=dx*vx+dy*vy,la=Math.abs(-dx*vy+dy*vx);return al>-10&&al<60&&la<40});
+ if(fa.length){const near=D.ents.filter(e=>e.k==='fence'&&Math.hypot((e.x-b.x)*W/100,(e.y-b.y)*H/100)<120).sort((p,q)=>Math.hypot(p.x-b.x,p.y-b.y)-Math.hypot(q.x-b.x,q.y-b.y)),n=Math.min(near.length,1+(Math.random()*3|0));
+  b.el.remove();ev.bear=null;near.slice(0,n).forEach(removeEnt);C=counts();toast(`🐻 Медведь напал на забор и сломал заборов: ${n}. Построй новые!`);if(shop)renderShop();return}
+ if(tg&&td<32){b.el.remove();ev.bear=null;return killPerson(tg)}
+ const sp=110*dt;b.x+=vx*sp/W*100;b.y+=vy*sp/H*100;b.el.style.left=b.x+'%';b.el.style.top=b.y+'%';
+ if(b.x<-6||b.x>106||b.t<=0){b.el.remove();ev.bear=null;toast('🐻 Медведь никого не нашёл и ушёл в лес')}}
 function events(dt){
+ petsAndRides(dt);
  D.peak=Math.max(D.peak||0,D.money);
  if(ev.burn){const b=ev.burn,l=Math.min(D.money,b.rate*dt);D.money-=l;b.lost+=l;b.t-=dt;if(b.t<=0)endBurn(false)}
  if(view!=='village')return;
@@ -453,6 +458,11 @@ function clickCap(r,g){const now=Date.now();D.clk=D.clk||{};let w=D.clk[r];if(!w
  const cap=capOf(r==='wood'?D.axe:D.pick),left=cap-w.n;if(left<=0){toast(`⏳ Лимит кликов: максимум ${cap} ${r==='wood'?'🪵':'🪨'} в минуту. Подожди ${Math.ceil((w.t+60000-now)/1000)} с`);return 0}
  const a=Math.min(g,left);w.n+=a;return a}
 function autoBtn(){$('autoBtn').textContent=D.auto?'🍽️ Автокормление: '+(D.autoOn?'вкл':'выкл'):'🍽️ Автокормление — 5000 💰'}
+function rideClick(){const n=(ST.pp||0);
+ if(D.autoRide){D.autoRideOn=!D.autoRideOn;return}
+ if(n<52)return toast('Автокатание открывается при 52 жителях (сейчас '+n+')');
+ if(D.money<10000)return toast('Не хватает денег: нужно 10000 💰');
+ ask('Купить автокатание?','Жители с потребностью в эмоциях сами дойдут до ближайшего аттракциона и покатаются 5–10 секунд.','Купить за 10000 💰',()=>{if(D.money<10000)return;D.money-=10000;D.autoRide=D.autoRideOn=true;toast('🎢 Автокатание включено')})}
 function autoClick(){if(D.auto){D.autoOn=!D.autoOn;autoBtn();return}
  if(D.money<5000)return toast('Не хватает денег: нужно 5000 💰');
  ask('Купить автокормление?','Жители будут сами есть со склада, пока есть продукты. Продукты по-прежнему нужно покупать.','Купить за 5000 💰',()=>{if(D.money<5000)return;D.money-=5000;D.auto=D.autoOn=true;autoBtn();toast('🍽️ Автокормление включено')})}
@@ -479,11 +489,19 @@ function sim(dt){
  houses.forEach(h=>{const nd=nodes[h.id],bg=nd&&nd.querySelector('.wk');
   if(bg)bg.innerHTML=occ[h.id]+'/'+capm[h.id]+' '+['water','gas','power'].map(t=>`<span style="opacity:${conn[h.id][t]?1:.3}">${ICO[t]}</span>`).join('')});
  D.ents.forEach(e=>{if(e.k==='rod'){const bg=nodes[e.id]&&nodes[e.id].querySelector('.wk');if(bg)bg.textContent='ур.'+(e.lv||2)+' ❤️'+(e.hp==null?(e.lv||2):e.hp)}});
+ const tents=D.ents.filter(e=>e.k==='tent'),tk={};
+ ppl.forEach(e=>{if(e.k!=='fisher')return;if(e.tent!=null&&tents.some(t=>t.id===e.tent)&&!tk[e.tent])tk[e.tent]=1;else e.tent=null});
+ ppl.forEach(e=>{if(e.k==='fisher'&&e.tent==null){const t=tents.find(t=>!tk[t.id]);if(t){e.tent=t.id;tk[t.id]=1}}});
  let ok=0;const bad=[],dead=[];
  ppl.forEach(e=>{const pet=e.k==='pet';
-  if(e.k==='fisher'){e.c=null;e.idle=false;ok++;const b0=nodes[e.id]&&nodes[e.id].querySelector('.bub'),un=!(e.pond!=null&&D.ents.some(o=>o.id===e.pond));
-   if(b0){b0.textContent=un?'🏞️?':'';b0.classList.toggle('on',un);b0.classList.remove('red')}if(nodes[e.id])nodes[e.id].classList.remove('danger');return}
-  if(e.hurt>0)e.hurt-=dt;e.hunger=Math.max(0,e.hunger-.4*dt);if(!pet)e.fun=Math.max(0,e.fun-(e.fr||.15)*dt);
+  if(e.k==='fisher'){e.c=null;e.idle=false;ok++;
+   if(e.tent==null)e.tl=(e.tl||0)+dt;else e.tl=Math.max(0,(e.tl||0)-2*dt);
+   const fd=e.tl>=144;if(e.tl>=240){e.why='tent';dead.push(e)}
+   if(fd&&!e.warned){e.warned=1;toast('⚠️ '+e.name+' на грани смерти: нет палатки')}if(e.tl<1)e.warned=0;
+   const un=!(e.pond!=null&&D.ents.some(o=>o.id===e.pond)),t0=fd?'☠️⛺':(e.tent==null?'⛺?':(un?'🏞️?':'')),b0=nodes[e.id]&&nodes[e.id].querySelector('.bub');
+   if(b0){b0.textContent=t0;b0.classList.toggle('on',!!t0);b0.classList.toggle('red',fd)}if(nodes[e.id])nodes[e.id].classList.toggle('danger',fd);return}
+  if(pet){e.bt=(e.bt==null?8+Math.random()*30:e.bt)-dt;if(e.bt<=0){e.bark=2.5;e.bt=25+Math.random()*35}}
+  if(e.hurt>0)e.hurt-=dt;e.hunger=Math.max(0,e.hunger-.4*dt);if(!pet)e.fun=Math.max(0,e.fun-(e.fr||.15)*(e.frm||1)*dt);
   if(!e.want)e.want=pickWant(e.k);
   if(D.auto&&D.autoOn&&e.hunger<=70){const ty=pet?['petfood']:['bread','meat','milk','fish'],k=D.food[e.want]>0?e.want:ty.find(t=>D.food[t]>0);
    if(k){D.food[k]--;e.nofood=0;e.hunger=Math.min(100,e.hunger+IT[k].fill);e.want=pickWant(e.k)}
@@ -494,10 +512,10 @@ function sim(dt){
     if(ok0)e.sat[t]=360;else{e.sat[t]=Math.max(0,(e.sat[t]||0)-dt);if(!lack&&e.sat[t]<=0)lack=t}});
    if(e.grace>0)e.grace-=dt;if(lack){e.why=lack;if(!(e.grace>0))e.risk=(e.risk||0)+dt}else{e.risk=Math.max(0,(e.risk||0)-2*dt);if(!e.risk)e.warned=0}}
   if(!pet)e.nofood=(e.nofood||0)+dt;
-  if(!pet&&e.nofood>=180)e.why='food';
-  const dg=!pet&&((e.risk||0)>=LIMIT*.6||e.nofood>=180);
+  if(!pet&&e.nofood>=252)e.why='food';
+  const dg=!pet&&((e.risk||0)>=LIMIT*.6||e.nofood>=252);
   if(dg&&!e.warned){e.warned=1;toast('⚠️ '+e.name+' на грани смерти: '+WHY[e.why])}
-  if(!pet&&((e.risk||0)>=LIMIT||e.nofood>=300))dead.push(e);
+  if(!pet&&((e.risk||0)>=LIMIT||e.nofood>=420))dead.push(e);
   let c=null;
   if(e.hunger<30)c=pet?'petfood':'food';
   else if(e.hurt>0)c='hurt';
@@ -505,7 +523,7 @@ function sim(dt){
   else if(e.k==='hunter'){c=null}
   else{const cn=conn[e.home];c=lack||((off||!(cn&&cn.power))?'power':null)||(e.fun<30?'fun':null)}
   e.c=c;if(!c)ok++;else bad.push(e);
-  const b=nodes[e.id]&&nodes[e.id].querySelector('.bub');let ic=(e.hunger<50&&(!c||c==='food'||c==='petfood'))?ICO[e.want]:(c?ICO[c]:'');if(dg)ic='☠️'+ICO[e.why];const nd2=nodes[e.id];if(nd2)nd2.classList.toggle('danger',dg);if(b){b.textContent=ic;b.classList.toggle('on',!!ic);b.classList.toggle('red',dg)}});
+  const b=nodes[e.id]&&nodes[e.id].querySelector('.bub');let ic=(e.hunger<50&&(!c||c==='food'||c==='petfood'))?ICO[e.want]:(c?ICO[c]:'');if(e.bark>0){ic='гав-гав';e.bark-=dt}if(dg)ic='☠️'+ICO[e.why];const nd2=nodes[e.id];if(nd2)nd2.classList.toggle('danger',dg);if(b){b.textContent=ic;b.classList.toggle('on',!!ic);b.classList.toggle('red',dg)}});
  dead.forEach(e=>killPerson(e,'💀 '+e.name+' умер(ла): '+WHY[e.why]));
  const pc={};D.ents.forEach(e=>{if(e.k==='fisher'&&e.pond!=null)pc[e.pond]=(pc[e.pond]||0)+1});
  let fr=0;D.ents.forEach(e=>{if(e.k==='pond'){fr+=pc[e.id]||0;const bg=nodes[e.id]&&nodes[e.id].querySelector('.wk');if(bg)bg.textContent='🎣'+(pc[e.id]||0)}});
@@ -513,19 +531,20 @@ function sim(dt){
  const wk=hum.filter(e=>e.k==='man'||e.k==='woman'),fb=wk.length?1+.25*wk.filter(e=>e.fam).length/wk.length:1;
  let slots=0,used=0;const rate={money:C.town?2:0,wood:0,stone:0};
  const jobs=D.ents.filter(e=>IT[e.k].slots),cap={},asg={},rest=[];
+ const ws={},wt=e=>e.fun<30?.5:1;
  jobs.forEach(j=>{cap[j.id]=slotsOf(j);asg[j.id]=0});
  ppl.forEach(e=>e.at=null);
  wk.forEach(e=>{if(e.job==='none')return;if(e.job!=null&&cap[e.job]==null)e.job=null;
-  if(e.job!=null&&asg[e.job]<cap[e.job]){asg[e.job]++;e.at=e.job}else rest.push(e)});
- let ri=0;jobs.forEach(j=>{while(asg[j.id]<cap[j.id]&&ri<rest.length){rest[ri++].at=j.id;asg[j.id]++}});
- jobs.forEach(j=>{const d=IT[j.k],w=asg[j.id];slots+=slotsOf(j);used+=w;rate[d.res]+=w*d.per*fb;
+  if(e.job!=null&&asg[e.job]<cap[e.job]){asg[e.job]++;ws[e.job]=(ws[e.job]||0)+wt(e);e.at=e.job}else rest.push(e)});
+ let ri=0;jobs.forEach(j=>{while(asg[j.id]<cap[j.id]&&ri<rest.length){const pp=rest[ri++];pp.at=j.id;asg[j.id]++;ws[j.id]=(ws[j.id]||0)+wt(pp)}});
+ jobs.forEach(j=>{const d=IT[j.k],w=asg[j.id];slots+=slotsOf(j);used+=w;rate[d.res]+=(ws[j.id]||0)*d.per*fb;
   const nd=nodes[j.id];if(nd){nd.classList.toggle('busy',w>0);const bg=nd.querySelector('.wk');if(bg)bg.textContent=w+'/'+slotsOf(j)}});
  ppl.forEach(e=>{const jb=nodes[e.id]&&nodes[e.id].querySelector('.jb');if(!jb)return;const aid=e.k==='fisher'?e.pond:e.at;const j=aid!=null&&D.ents.find(o=>o.id===aid);jb.textContent=j?IT[j.k].e:'';jb.style.display=j?'block':'none'});
  const inc=rate.money*m;
  D.money+=(inc-up)*dt;off=false;if(D.money<=0){D.money=0;off=up>inc}
  D.wood+=rate.wood*m*dt;D.stone+=rate.stone*m*dt;
  events(dt);
- ST={inc,up,mood:ppl.length?Math.round(ok/ppl.length*100):100,n:ppl.length,used,slots};
+ ST={inc,up,mood:ppl.length?Math.round(ok/ppl.length*100):100,n:ppl.length,pp:hum.length,used,slots};
  cd-=dt;if(cd<=0&&bad.length){const e=bad[Math.random()*bad.length|0];toast(e.name+': '+(e.c==='food'||e.c==='petfood'?'Хочу '+ICO[e.want]+'!':TXT[e.c]));cd=12}}
 
 let rc=0,sv=0,last=Date.now();
@@ -533,6 +552,7 @@ function hud(dt){
  $('rm').textContent=fmt(D.money);$('rw').textContent=fmt(D.wood);$('rs').textContent=fmt(D.stone);
  $('st').innerHTML=`😊 ${ST.mood}% · 👥 ${ST.n} · 🔨 ${ST.used}/${ST.slots} · <span class="g">+${fmt1(ST.inc)}</span> / <span class="r">−${fmt1(ST.up)}</span> 💰/с`;
  ['bread','meat','milk','fish','petfood'].forEach(k=>{const c=$('fc-'+k);if(c){c.textContent=D.food[k];c.parentElement.classList.toggle('empty',!D.food[k])}});
+ const rb=$('rideBtn'),rt=D.autoRide?'🎢 Автокатание: '+(D.autoRideOn?'вкл':'выкл'):'🎢 Автокатание — 10000 💰 (жителей '+(ST.pp||0)+'/52)';if(rb.textContent!==rt)rb.textContent=rt;
  rc+=dt;if(rc>.6){rc=0;document.querySelectorAll('.card').forEach(el=>{const c=cost(el.dataset.k);el.classList.toggle('no',!can(c));el.querySelectorAll('.chip').forEach((ch,i)=>{const r=Object.keys(c)[i];ch.classList.toggle('lack',D[r]<c[r])})})}}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}};
 setInterval(()=>{const n=Date.now(),dt=Math.min((n-last)/1000,2);last=n;sim(dt);hud(dt);sv+=dt;if(sv>5){sv=0;save()}},200);
@@ -540,7 +560,7 @@ document.addEventListener('visibilitychange',save);
 
 // перетаскивание
 field.addEventListener('pointerdown',e=>{const el=e.target.closest('.ent');if(!el){if(e.pointerType==='mouse'&&!e.target.closest('.buyland')){pan={x:e.clientX,y:e.clientY,l:vp.scrollLeft,t:vp.scrollTop};vp.style.cursor='grabbing';field.setPointerCapture(e.pointerId)}return}
- const en0=D.ents.find(o=>o.id==el.dataset.id);drag={el,ent:en0,ox:en0.x,oy:en0.y,cx:e.clientX,cy:e.clientY};el.setPointerCapture(e.pointerId);el.classList.add('drag');el.classList.remove('walk');$('trash').classList.add('on')});
+ const en0=D.ents.find(o=>o.id==el.dataset.id);en0.ride=null;drag={el,ent:en0,ox:en0.x,oy:en0.y,cx:e.clientX,cy:e.clientY};el.setPointerCapture(e.pointerId);el.classList.add('drag');el.classList.remove('walk');$('trash').classList.add('on')});
 field.addEventListener('pointermove',e=>{if(pan){vp.scrollLeft=pan.l-(e.clientX-pan.x);vp.scrollTop=pan.t-(e.clientY-pan.y);return}if(!drag)return;const r=field.getBoundingClientRect(),en=drag.ent;
  en.x=Math.min(97,Math.max(3,(e.clientX-r.left)/r.width*100));en.y=Math.min(95,Math.max(5,(e.clientY-r.top)/r.height*100));placeEl(drag.el,en);$('trash').classList.toggle('hot',overTrash(e))});
 const endDrag=(e,drop)=>{if(!drag)return;const{el,ent,ox,oy,cx,cy}=drag;drag=null;el.classList.remove('drag');$('trash').classList.remove('on','hot');
@@ -567,7 +587,7 @@ const endDrag=(e,drop)=>{if(!drag)return;const{el,ent,ox,oy,cx,cy}=drag;drag=nul
  const a=D.ents.find(o=>IT[o.k].fee&&Math.hypot((o.x-ent.x)*r.width/100,(o.y-ent.y)*r.height/100)<50);
  if(!a)return;
  if(ent.fun>70)return toast(ent.name+': пока не хочу кататься');
- ent.fun=100;const fee=Math.round(IT[a.k].fee*mult());D.money+=fee;pop(field,e.clientX,e.clientY,'+'+fee+' 💰 😄')};
+ ent.fun=100;ent.frm=FRM[a.k]||1;const fee=Math.round(IT[a.k].fee*mult());D.money+=fee;pop(field,e.clientX,e.clientY,'+'+fee+' 💰 😄')};
 field.addEventListener('pointerup',e=>{pan=null;vp.style.cursor='';endDrag(e,true)});
 field.addEventListener('pointercancel',e=>{pan=null;vp.style.cursor='';endDrag(e,false)});
 
@@ -575,6 +595,7 @@ document.addEventListener('click',e=>{
  if(e.target.id==='yes'){const f=modalYes;modalYes=modalNo=null;$('modal').classList.remove('on');if(f)f();return}
  if(e.target.id==='no'||e.target.id==='modal'){const f=modalNo;modalYes=modalNo=null;$('modal').classList.remove('on');if(f)f();return}
  if(e.target.id==='autoBtn'){autoClick();return}
+ if(e.target.id==='rideBtn'){rideClick();return}
  if(e.target.id==='pf'){pondGuess('fish');return}
  if(e.target.id==='pe'){pondGuess('eagle');return}
  if(e.target.id==='px'){pondSell();return}
