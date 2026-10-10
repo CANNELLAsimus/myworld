@@ -114,6 +114,8 @@ h4{margin:10px 0 4px;font-size:14px;color:var(--yel)}
 @media (max-height:600px){.big{width:130px;height:130px;font-size:58px}}
 .qd{position:fixed;left:50%;bottom:calc(86px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ui);border:2px solid var(--yel);border-radius:14px;padding:10px 16px;max-width:90%;width:max-content;text-align:center;z-index:98;opacity:0;pointer-events:none;transition:opacity .4s;display:flex;flex-direction:column;gap:4px;font-size:14px}
 .qd b{color:var(--yel)}.qd.show{opacity:1}
+.ent.new .em{animation:glow .5s ease-in-out infinite alternate}
+@keyframes glow{from{filter:drop-shadow(0 0 4px #facc15)}to{filter:drop-shadow(0 0 18px #facc15) drop-shadow(0 0 8px #fff)}}
 :focus-visible{outline:2px solid var(--blue2);outline-offset:2px}
 </style>
 </head>
@@ -239,14 +241,18 @@ function buyLand(k){const c=LAND[k];
 function spawnPos(){const cx=(vp.scrollLeft+vp.clientWidth/2)/Math.max(1,field.offsetWidth)*100,cy=(vp.scrollTop+vp.clientHeight/2)/Math.max(1,field.offsetHeight)*100;
  let k=(cx<50?0:1)+','+(cy<50?0:1);if(!D.land[k]){const a=Object.keys(D.land).filter(q=>D.land[q]);k=a[Math.random()*a.length|0]}
  const[c,r]=k.split(',').map(Number);return{x:c*50+6+Math.random()*38,y:r*50+4+Math.random()*20}}
+function cornerPos(){const cx=(vp.scrollLeft+vp.clientWidth/2)/Math.max(1,field.offsetWidth)*100,cy=(vp.scrollTop+vp.clientHeight/2)/Math.max(1,field.offsetHeight)*100;
+ let k=(cx<50?0:1)+','+(cy<50?0:1);if(!D.land[k]){const a=Object.keys(D.land).filter(q=>D.land[q]);k=a[Math.random()*a.length|0]}
+ const[c,r]=k.split(',').map(Number);return{x:c*50+43+Math.random()*4,y:r*50+42+Math.random()*3}}
 function mkEnt(e){const d=IT[e.k],el=document.createElement('div');
  el.className='ent'+(d.s?' sm':'')+(d.ppl?' p':'');el.dataset.id=e.id;el.dataset.k=e.k;
  el.innerHTML=`<span class="em">${e.k==='pond'?POND:d.e}</span>${d.slots||d.svc||e.k==='house'||e.k==='rod'||e.k==='pond'?'<span class="wk"></span>':''}`+(d.ppl?`<span class="bub"></span><span class="jb"></span><i class="nm">${e.name}</i>`:'');
  placeEl(el,e);field.appendChild(el);nodes[e.id]=el}
-function spawn(k){const d=IT[k],e={id:D.nid++,k,...spawnPos()};
+function spawn(k){const d=IT[k],e={id:D.nid++,k,...(k==='fence'?cornerPos():spawnPos())};
  if(d.ppl){e.name=NAMES[k][Math.random()*NAMES[k].length|0];e.hunger=100;e.fun=60+Math.random()*40;e.fr=.1+Math.random()*.12;e.want=pickWant(k);if(k!=='pet')e.grace=180}
  if(LV0[k])e.lv=LV0[k];if(k==='rod')e.hp=e.lv;
- D.ents.push(e);mkEnt(e)}
+ D.ents.push(e);mkEnt(e);
+ if(!d.ppl&&k!=='fence'){const nn=nodes[e.id];nn.classList.add('new');setTimeout(()=>nn.classList.remove('new'),4500)}}
 
 function buy(k){
  if(k.startsWith('upg:')){const n=k.slice(4),u=UPG[n];if(D.up[n]>=u.max)return toast('Максимальный уровень');
@@ -264,7 +270,7 @@ function buy(k){
  if(!can(c))return toast('Не хватает ресурсов');
  for(const r in c)D[r]-=c[r];
  if(d.food){D.food[d.food]+=d.qty;toast('+'+d.qty+' порций на складе — перетащи еду из «Склада» на жителя')}
- else{spawn(k);toast(d.n+' появился(ась) в деревне — перетащи на нужное место')}
+ else{spawn(k);toast(k==='fence'?'🚧 Забор появился в правом нижнем углу — перетащи его на нужное место':d.n+' появился(ась) в деревне — перетащи на нужное место')}
  C=counts();renderShop();renderUp()}
 
 function renderShop(){
