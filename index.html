@@ -145,7 +145,7 @@ h4{margin:10px 0 4px;font-size:14px;color:var(--yel)}
 </div>
 <div class="modal" id="modal"><div class="box"><b id="mt"></b><p id="mp"></p><div class="acts"><button class="gray" id="no">Отмена</button><button class="danger" id="yes">Да, сбросить</button></div></div></div>
 <div class="qd" id="qd"><b>💬 Цитата дня</b><span id="qt"></span></div>
-<div class="modal" id="pm"><div class="box"><b>🏞️ Водоём</b><p id="pmi"></p><p>Угадай, что выпадет:</p><div class="acts"><button id="pf">🐟 Рыба</button><button id="pe">🦅 Орёл</button></div><p id="pmr"></p><div class="acts"><button class="gray" id="px">Обменять 1 🐟 на 5% денег</button></div><div class="acts"><button class="gray" id="pc">Закрыть</button></div></div></div>
+<div class="modal" id="pm"><div class="box"><b>🏞️ Водоём</b><p id="pmi"></p><p>Угадай, что выпадет:</p><div class="acts"><button id="pf">🐟 Рыба</button><button id="pe">🦅 Орёл</button></div><p id="pmr"></p><div class="acts"><button class="gray" id="px">Обменять 10 🐟 на 5% денег</button></div><div class="acts"><button class="gray" id="pc">Закрыть</button></div></div></div>
 <div class="toast" id="toast"></div>
 <script>
 const $=id=>document.getElementById(id);
@@ -153,7 +153,7 @@ const IT={
 town:{c:'ind',n:'Ратуша',e:'🏛️',d:'Нужна для всех покупок. Сама даёт +2 💰/с и 2 рабочих места (+1.5 💰/с за работника)',b:{money:100},g:1,max:1,slots:2,per:1.5,res:'money'},
 rod:{c:'ind',n:'Громоотвод',e:'🗼',d:'Принимает на себя молнию, выдерживает столько ударов, какой у него уровень (старт 2, максимум 4). Нажми на громоотвод, чтобы улучшить',b:{money:400,wood:30,stone:60},g:1.3,max:3},
 lodge:{c:'ind',n:'Охотничья хижина',e:'🛖',d:'Дом на 2 охотников, которые прогоняют медведей',b:{money:700,wood:120,stone:60},g:1.5},
-pond:{c:'ind',n:'Водоём',e:'🏞️',d:'До 3 рыбаков (перетащи рыбака на водоём) ловят бесплатную рыбу 🐟. Нажми на водоём: угадай рыба или орёл (+2 🐟 или −5% денег) и обменивай рыбу на деньги (1 🐟 = 5% баланса)',b:{money:600,wood:100,stone:60},g:1.5},
+pond:{c:'ind',n:'Водоём',e:'🏞️',d:'До 3 рыбаков (перетащи рыбака на водоём) ловят бесплатную рыбу 🐟. Нажми на водоём: угадай рыба или орёл (+2 🐟 или −5% денег) и обменивай рыбу на деньги (10 🐟 = 5% баланса)',b:{money:600,wood:100,stone:60},g:1.5},
 fence:{c:'ind',n:'Забор',e:'🚧',d:'Защита от медведей: он ломает от 1 до 3 заборов в зоне своего зрения, а пока заборы есть, жителей не трогает',b:{wood:60},g:1.1,max:30,s:1},
 hut:{c:'ind',n:'Здание строителей',e:'🏗️',d:'+20% к доходу и открывает аттракционы (до 3 шт.)',b:{money:800,wood:120,stone:80},g:2.8,max:3},
 workshop:{c:'ind',n:'Мастерская',e:'🛠️',d:'3 рабочих места, +2 💰/с за работника. Жителей назначают перетаскиванием на здание',b:{money:500,wood:60},g:1.4,slots:3,per:2,res:'money'},
@@ -321,7 +321,7 @@ function pondGuess(g){const was=pondAns;pondAns=Math.random()<.5?'fish':'eagle';
  if(g===was){D.food.fish+=2;$('pmr').textContent='✅ Угадал! Выпал '+nm+'. +2 🐟'}
  else{const loss=Math.floor(D.money*.05);D.money-=loss;$('pmr').textContent='❌ Не угадал: выпал '+nm+'. −5% баланса (−'+fmt(loss)+' 💰)'}
  pondInfo()}
-function pondSell(){if(D.food.fish<1)return toast('У тебя нет рыбы');const g=Math.max(1,Math.floor(D.money*.05));D.food.fish--;D.money+=g;$('pmr').textContent='💱 Обменял 1 🐟 на '+fmt(g)+' 💰';pondInfo()}
+function pondSell(){if(D.food.fish<10)return toast('Для обмена нужно 10 🐟, сейчас '+D.food.fish);const g=Math.max(1,Math.floor(D.money*.05));D.food.fish-=10;D.money+=g;$('pmr').textContent='💱 Обменял 10 🐟 на '+fmt(g)+' 💰';pondInfo()}
 function bindPond(e,p){if(e.k!=='fisher')return toast('Рыбачить могут только рыбаки');
  if(e.pond!==p.id&&D.ents.filter(o=>o.k==='fisher'&&o.pond===p.id).length>=3)return toast('У водоёма уже 3 рыбака — это максимум');
  e.pond=p.id;toast('🎣 '+e.name+' теперь ловит рыбу в этом водоёме')}
