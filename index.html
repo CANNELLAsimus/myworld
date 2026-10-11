@@ -180,9 +180,9 @@ water:{c:'util',svc:'water',n:'Водонапорная башня',e:'🚰',d:'
 gas:{c:'util',svc:'gas',n:'Газовая станция',e:'🔥',d:'Газ для 3 ближайших домов. Обслуживание 0.6 💰/с',b:{money:700,stone:120},g:1.3},
 power:{c:'util',svc:'power',n:'Электростанция',e:'💡',d:'Свет для 3 ближайших домов. Обслуживание 0.8 💰/с',b:{money:800,wood:80,stone:90},g:1.3},
 house:{c:'util',n:'Жилой дом',e:'🏠',d:'Прописка по уровню дома (старт 4, максимум 7; питомцы не в счёт, охотникам дом не нужен). Нажми на дом, чтобы улучшить. Обслуживание 0.5 💰/с',b:{money:1200,wood:200,stone:120},g:1.3},
-man:{c:'ppl',n:'Мужчина',e:'👨',d:'Работает на предприятии (назначается перетаскиванием). Нужны жильё, вода, газ, еда и развлечения. Живёт 15 минут, затем умирает от старости',b:{money:250},g:1.15,ppl:1},
-woman:{c:'ppl',n:'Женщина',e:'👩',d:'Работает на предприятии (назначается перетаскиванием). Нужны жильё, вода, газ, еда и развлечения. Живёт 15 минут, затем умирает от старости',b:{money:250},g:1.15,ppl:1},
-child:{c:'ppl',n:'Ребёнок',e:'🧒',d:'Не работает, но нужен семье. Через 15 минут вырастает во взрослого (мужчину или женщину), ещё через 15 минут умирает от старости',b:{money:150},g:1.15,ppl:1},
+man:{c:'ppl',n:'Мужчина',e:'👨',d:'Работает на предприятии (назначается перетаскиванием). Нужны жильё, вода, газ, еда и развлечения. Живёт от 15 до 24 минут, затем умирает от старости',b:{money:250},g:1.15,ppl:1},
+woman:{c:'ppl',n:'Женщина',e:'👩',d:'Работает на предприятии (назначается перетаскиванием). Нужны жильё, вода, газ, еда и развлечения. Живёт от 15 до 24 минут, затем умирает от старости',b:{money:250},g:1.15,ppl:1},
+child:{c:'ppl',n:'Ребёнок',e:'🧒',d:'Не работает, но нужен семье. Через 15 минут вырастает во взрослого (мужчину или женщину), который живёт ещё 15–24 минуты',b:{money:150},g:1.15,ppl:1},
 hunter:{c:'ppl',n:'Охотник',e:'🏹',d:'Нужна только еда (ЖКХ и аттракционы не нужны), не стареет. Идёт к медведю в зоне зрения: один охотник — шансы 50 на 50, чем больше охотников, тем меньше шансов у медведя. Проигравший может погибнуть. Нужна свободная хижина',b:{money:600},g:1.2,ppl:1},
 fisher:{c:'ppl',n:'Рыбак',e:'🎣',d:'Ловит рыбу в водоёме (перетащи на водоём, максимум 3 на водоём). Нужна палатка ⛺ (500 💰 на каждого), без неё живёт 4 минуты. Еда, ЖКХ и развлечения не нужны',b:{money:300},g:1.2,ppl:1},
 pet:{c:'ppl',n:'Питомец',e:'🐶',d:'Ест только корм. Без дома: перетащи на жителя, чтобы привязать',b:{money:200},g:1.15,ppl:1}};
@@ -540,10 +540,10 @@ function sim(dt){
  let ok=0;const bad=[],dead=[];
  ppl.forEach(e=>{const pet=e.k==='pet';
   if(!pet){e.age=(e.age||0)+dt;
-   if(e.k==='child'&&e.age>=900){const nk=Math.random()<.5?'man':'woman';e.k=nk;e.age=0;delete e.fam;e.job=null;
+   if(e.k==='child'&&e.age>=900){const nk=Math.random()<.5?'man':'woman';e.k=nk;e.age=0;e.life=900+Math.random()*540;delete e.fam;e.job=null;
     const n0=nodes[e.id];if(n0){n0.dataset.k=nk;n0.querySelector('.em').textContent=IT[nk].e}
     toast('🎉 '+e.name+' вырос(ла) и стал(а) взрослым');relabel();if(shop&&cat==='fam')renderFam()}
-   else if(e.k!=='child'&&e.k!=='hunter'&&e.age>=900){e.why='age';dead.push(e)}}
+   else if(e.k!=='child'&&e.k!=='hunter'&&e.age>=(e.life||(e.life=900+Math.random()*540))){e.why='age';dead.push(e)}}
   if(e.k==='fisher'){e.c=null;e.idle=false;ok++;
    if(e.tent==null)e.tl=(e.tl||0)+dt;else e.tl=Math.max(0,(e.tl||0)-2*dt);
    const fd=e.tl>=144;if(e.tl>=240){e.why='tent';dead.push(e)}
@@ -573,7 +573,7 @@ function sim(dt){
   else if(e.k==='hunter'){c=null}
   else{const cn=conn[e.home];c=lack||((off||!(cn&&cn.power))?'power':null)||(e.fun<30?'fun':null)}
   e.c=c;if(!c)ok++;else bad.push(e);
-  const b=nodes[e.id]&&nodes[e.id].querySelector('.bub');let ic=(e.hunger<50&&(!c||c==='food'||c==='petfood'))?ICO[e.want]:(c?ICO[c]:'');if(!pet&&e.k!=='child'&&e.k!=='hunter'&&e.age>=840&&!ic)ic='🕰️';
+  const b=nodes[e.id]&&nodes[e.id].querySelector('.bub');let ic=(e.hunger<50&&(!c||c==='food'||c==='petfood'))?ICO[e.want]:(c?ICO[c]:'');if(!pet&&e.k!=='child'&&e.k!=='hunter'&&e.age>=(e.life||900)-60&&!ic)ic='🕰️';
   if(e.bark>0){ic='гав-гав';e.bark-=dt}if(dg)ic='☠️'+ICO[e.why];const nd2=nodes[e.id];if(nd2)nd2.classList.toggle('danger',dg);if(b){b.textContent=ic;b.classList.toggle('on',!!ic);b.classList.toggle('red',dg)}});
  [...new Set(dead)].forEach(e=>killPerson(e,'💀 '+e.name+' умер(ла): '+WHY[e.why]));
  const pc={};D.ents.forEach(e=>{if(e.k==='fisher'&&e.pond!=null)pc[e.pond]=(pc[e.pond]||0)+1});
