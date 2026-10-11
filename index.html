@@ -116,6 +116,10 @@ h4{margin:10px 0 4px;font-size:14px;color:var(--yel)}
 .qd b{color:var(--yel)}.qd.show{opacity:1}
 .ent.new .em{animation:glow .5s ease-in-out infinite alternate}
 @keyframes glow{from{filter:drop-shadow(0 0 4px #facc15)}to{filter:drop-shadow(0 0 18px #facc15) drop-shadow(0 0 8px #fff)}}
+.marq{position:absolute;border:2px dashed var(--yel);background:#facc1522;z-index:960;pointer-events:none}
+.ent.sel .em{filter:drop-shadow(0 0 7px #60a5fa) drop-shadow(0 0 3px #60a5fa)}
+.bodds{position:absolute;left:50%;top:-16px;transform:translateX(-50%);font-size:12px;font-weight:800;background:var(--ui);border:1px solid var(--bad);border-radius:8px;padding:0 5px;white-space:nowrap}
+.bodds:empty{display:none}
 :focus-visible{outline:2px solid var(--blue2);outline-offset:2px}
 </style>
 </head>
@@ -129,7 +133,7 @@ h4{margin:10px 0 4px;font-size:14px;color:var(--yel)}
   </div>
   <div class="stats"><span id="st"></span><button id="reset">сброс</button></div>
   <div class="stats" id="fd"><span>Склад — перетащи еду на жителя:</span><span id="tray"></span></div>
-  <div class="stats links"><a href="https://t.me/d0briChannel" target="_blank" rel="noopener">✈️ Telegram</a><a href="https://www.youtube.com/channel/UCrkSFsLzw1F71iqmQpQIxjg" target="_blank" rel="noopener">▶️ YouTube</a><button id="autoBtn"></button><button id="rideBtn"></button></div>
+  <div class="stats links"><a href="https://t.me/d0briChannel" target="_blank" rel="noopener">✈️ Telegram</a><a href="https://www.youtube.com/channel/UCrkSFsLzw1F71iqmQpQIxjg" target="_blank" rel="noopener">▶️ YouTube</a><button id="autoBtn"></button><button id="rideBtn"></button><button id="selBtn">⬚ Выделение: выкл</button></div>
  </div>
  <main>
   <div id="village" class="screen on"><div id="world"></div></div>
@@ -176,10 +180,10 @@ water:{c:'util',svc:'water',n:'Водонапорная башня',e:'🚰',d:'
 gas:{c:'util',svc:'gas',n:'Газовая станция',e:'🔥',d:'Газ для 3 ближайших домов. Обслуживание 0.6 💰/с',b:{money:700,stone:120},g:1.3},
 power:{c:'util',svc:'power',n:'Электростанция',e:'💡',d:'Свет для 3 ближайших домов. Обслуживание 0.8 💰/с',b:{money:800,wood:80,stone:90},g:1.3},
 house:{c:'util',n:'Жилой дом',e:'🏠',d:'Прописка по уровню дома (старт 4, максимум 7; питомцы не в счёт, охотникам дом не нужен). Нажми на дом, чтобы улучшить. Обслуживание 0.5 💰/с',b:{money:1200,wood:200,stone:120},g:1.3},
-man:{c:'ppl',n:'Мужчина',e:'👨',d:'Работает на предприятии (назначается перетаскиванием). Нужны жильё, вода, газ, еда и развлечения',b:{money:250},g:1.15,ppl:1},
-woman:{c:'ppl',n:'Женщина',e:'👩',d:'Работает на предприятии (назначается перетаскиванием). Нужны жильё, вода, газ, еда и развлечения',b:{money:250},g:1.15,ppl:1},
-child:{c:'ppl',n:'Ребёнок',e:'🧒',d:'Не работает, но нужен семье. Нужны жильё, вода, газ и еда',b:{money:150},g:1.15,ppl:1},
-hunter:{c:'ppl',n:'Охотник',e:'🏹',d:'Нужна только еда: ЖКХ и аттракционы не нужны. Сам идёт к медведю в зоне зрения, шансы 50 на 50. Нужна свободная хижина',b:{money:600},g:1.2,ppl:1},
+man:{c:'ppl',n:'Мужчина',e:'👨',d:'Работает на предприятии (назначается перетаскиванием). Нужны жильё, вода, газ, еда и развлечения. Живёт 15 минут, затем умирает от старости',b:{money:250},g:1.15,ppl:1},
+woman:{c:'ppl',n:'Женщина',e:'👩',d:'Работает на предприятии (назначается перетаскиванием). Нужны жильё, вода, газ, еда и развлечения. Живёт 15 минут, затем умирает от старости',b:{money:250},g:1.15,ppl:1},
+child:{c:'ppl',n:'Ребёнок',e:'🧒',d:'Не работает, но нужен семье. Через 15 минут вырастает во взрослого (мужчину или женщину), ещё через 15 минут умирает от старости',b:{money:150},g:1.15,ppl:1},
+hunter:{c:'ppl',n:'Охотник',e:'🏹',d:'Нужна только еда (ЖКХ и аттракционы не нужны), не стареет. Идёт к медведю в зоне зрения: один охотник — шансы 50 на 50, чем больше охотников, тем меньше шансов у медведя. Проигравший может погибнуть. Нужна свободная хижина',b:{money:600},g:1.2,ppl:1},
 fisher:{c:'ppl',n:'Рыбак',e:'🎣',d:'Ловит рыбу в водоёме (перетащи на водоём, максимум 3 на водоём). Нужна палатка ⛺ (500 💰 на каждого), без неё живёт 4 минуты. Еда, ЖКХ и развлечения не нужны',b:{money:300},g:1.2,ppl:1},
 pet:{c:'ppl',n:'Питомец',e:'🐶',d:'Ест только корм. Без дома: перетащи на жителя, чтобы привязать',b:{money:200},g:1.15,ppl:1}};
 const CATS=[['ind','🏭 Промышленность'],['att','🎢 Аттракционы'],['food','🍞 Продукты'],['util','🚰 ЖКХ'],['ppl','🧑 Люди'],['fam','👨‍👩‍👧 Семьи']];
@@ -191,7 +195,7 @@ pet:['Бобик','Luna','Rex','Mochi','Simba','Tofu','Fluffy','Bruno','Kiki','S
 const TXT={owner:'Мне нужен хозяин — перетащи меня на жителя',hurt:'Я ранен после схватки с медведем',food:'Я голоден!',petfood:'Мне нечего есть!',house:'Мне холодно: нет дома!',water:'Нет воды!',gas:'Нет газа!',power:'Нет света!',fun:'Хочу эмоций — отведи меня на аттракцион!'};
 const ICO={fish:'🐟',owner:'🔗',hurt:'🩹',bread:'🍞',meat:'🍖',milk:'🥛',food:'🍞',petfood:'🦴',house:'🥶',water:'💧',gas:'🔥',power:'💡',fun:'🎢'};
 NAMES.hunter=NAMES.man;NAMES.fisher=NAMES.man;
-const BVIEW=230,LIMIT=480,WHY={tent:'нет палатки',food:'голод',house:'нет дома, холод',water:'нет воды',gas:'нет газа'};
+const BVIEW=230,LIMIT=480,WHY={age:'старость',tent:'нет палатки',food:'голод',house:'нет дома, холод',water:'нет воды',gas:'нет газа'};
 const QUOTES=['Маленький шаг сегодня лучше большого плана завтра.', 'Каждая великая деревня начиналась с одного забора.', 'Упорство важнее таланта, когда талант отдыхает.', 'Не торопись — главное, чтобы ты двигался вперёд.', 'Сегодня отличный день, чтобы построить что-то новое.', 'Ошибка — это просто урок в красивой упаковке.', 'Чем больше дел начато, тем меньше шансов остаться на месте.', 'Терпение — это тоже работа.', 'Сильная команда начинается с одного доброго слова.', 'Не жди идеального момента — создай его.', 'Даже самый длинный путь состоит из обычных шагов.', 'Тот, кто копает глубже, находит больше.', 'Береги тех, кто рядом: они — твой главный ресурс.', 'Порядок в маленьком — спокойствие в большом.', 'Если трудно, значит, ты растёшь.', 'Хорошая идея любит действие.', 'Улыбнись: твоя деревня сегодня станет чуть лучше.', 'Лучшее время начать — сейчас.', 'Победа любит тех, кто не сдаётся после первой неудачи.', 'Умей отдыхать, но не забывай возвращаться к делу.', 'Знания — как инструменты: чем чаще используешь, тем острее.', 'Не сравнивай свой первый день с чужим сотым.', 'Доброта ничего не стоит, но многое меняет.', 'Каждый день — чистая страница.', 'Смелость — это делать шаг, даже когда страшно.', 'Кто ищет возможности, тот их находит.', 'Хороший лидер сначала заботится о людях.', 'Трудности временны, опыт остаётся навсегда.', 'Маленькие привычки строят большие результаты.', 'Не бойся менять план, бойся не иметь цели.', 'Тишина и труд рождают лучшие идеи.', 'Сегодня ты на шаг ближе к цели, чем вчера.', 'Секрет успеха — продолжать, когда другие остановились.', 'Береги время: оно строит больше, чем деньги.', 'Мечтай масштабно, действуй по шагам.', 'Дружба — самое надёжное здание в любой деревне.', 'Тот, кто учится, никогда не проигрывает полностью.', 'Спокойствие помогает увидеть решение там, где другие видят проблему.', 'Начни с малого — и продолжай до большого.', 'Чем крепче основа, тем выше можно строить.', 'Благодарность делает любой день светлее.', 'Верь в свой план и не забывай его проверять.'];
 const POND='<svg viewBox="0 0 100 70" width="104" height="73"><path d="M10 38C6 20 26 7 46 11C60 3 87 9 91 30C99 45 81 63 58 60C44 69 19 63 10 38Z" fill="#1e5fa8" stroke="#7cc4ff" stroke-width="3"/><path d="M26 28C34 20 48 20 56 25" fill="none" stroke="#b6e1ff" stroke-width="3" stroke-linecap="round" opacity=".7"/><path d="M52 44C60 40 72 41 78 46" fill="none" stroke="#b6e1ff" stroke-width="2.5" stroke-linecap="round" opacity=".5"/></svg>';
 const FRM={carousel:1,circus:.75,ferris:.55,coaster:.4};
@@ -206,6 +210,15 @@ const fmt=n=>{n=Math.floor(n);return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e4?(n/1e3
 const fmt1=n=>n<10?n.toFixed(1):fmt(n);
 const counts=()=>{const c={};D.ents.forEach(e=>c[e.k]=(c[e.k]||0)+1);return c};
 const mult=()=>1+.2*(C.hut||0);
+const sel=new Set();let selMode=false,marq=null;
+function clearSel(){sel.clear();document.querySelectorAll('.ent.sel').forEach(n=>n.classList.remove('sel'))}
+function marqStart(e){const r=field.getBoundingClientRect();clearSel();marq={x0:e.clientX-r.left,y0:e.clientY-r.top,el:document.createElement('div')};marq.el.className='marq';field.appendChild(marq.el);field.setPointerCapture(e.pointerId)}
+function marqMove(e){const r=field.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,m=marq;
+ m.el.style.left=Math.min(m.x0,x)+'px';m.el.style.top=Math.min(m.y0,y)+'px';m.el.style.width=Math.abs(x-m.x0)+'px';m.el.style.height=Math.abs(y-m.y0)+'px';m.x1=x;m.y1=y}
+function marqEnd(){const m=marq;marq=null;m.el.remove();if(m.x1==null)return;
+ const W=field.offsetWidth,H=field.offsetHeight,l=Math.min(m.x0,m.x1),t=Math.min(m.y0,m.y1),rr=Math.max(m.x0,m.x1),b=Math.max(m.y0,m.y1);
+ D.ents.forEach(o=>{const px=o.x*W/100,py=o.y*H/100;if(px>=l&&px<=rr&&py>=t&&py<=b&&nodes[o.id]){sel.add(o.id);nodes[o.id].classList.add('sel')}});
+ if(sel.size)toast('Выделено объектов: '+sel.size+'. Перетащи любой из них, чтобы двигать все вместе')}
 const UPG={rod:{n:'Громоотвод',e:'🗼',max:4,costs:{3:750,4:2000},d:l=>`выдерживает ${l} уд. молнии`},
  house:{n:'Жилой дом',e:'🏠',max:7,costs:{5:1500,6:2000,7:2200},d:l=>`прописка до ${l} человек`},
  factory:{n:'Завод',e:'🏭',max:10,costs:{6:3000,7:4000,8:5000,9:6000,10:7000},d:l=>`${l} рабочих мест`}};
@@ -249,7 +262,7 @@ function mkEnt(e){const d=IT[e.k],el=document.createElement('div');
  el.innerHTML=`<span class="em">${e.k==='pond'?POND:d.e}</span>${d.slots||d.svc||e.k==='house'||e.k==='rod'||e.k==='pond'?'<span class="wk"></span>':''}`+(d.ppl?`<span class="bub"></span><span class="jb"></span><i class="nm">${e.name}</i>`:'');
  placeEl(el,e);field.appendChild(el);nodes[e.id]=el}
 function spawn(k){const d=IT[k],e={id:D.nid++,k,...(k==='fence'?cornerPos():spawnPos())};
- if(d.ppl){e.name=NAMES[k][Math.random()*NAMES[k].length|0];e.hunger=100;e.fun=60+Math.random()*40;e.fr=.1+Math.random()*.12;e.want=pickWant(k);if(k!=='pet')e.grace=180}
+ if(d.ppl){e.name=NAMES[k][Math.random()*NAMES[k].length|0];e.hunger=70+Math.random()*30;e.hr=.3+Math.random()*.2;e.fun=60+Math.random()*40;e.fr=.1+Math.random()*.12;e.want=pickWant(k);if(k!=='pet')e.grace=180}
  if(LV0[k])e.lv=LV0[k];if(k==='rod')e.hp=e.lv;
  D.ents.push(e);mkEnt(e);
  if(!d.ppl&&k!=='fence'){const nn=nodes[e.id];nn.classList.add('new');setTimeout(()=>nn.classList.remove('new'),4500)}}
@@ -360,7 +373,7 @@ function renderFam(){
  $('list').innerHTML=h}
 let ev={stormT:100,bearT:130,burn:null,bear:null,sw:0};
 const burnable=()=>D.ents.filter(e=>!IT[e.k].ppl&&!['town','fence','rod','pond'].includes(e.k));
-function removeEnt(e){if(nodes[e.id]){nodes[e.id].remove();delete nodes[e.id]}D.ents=D.ents.filter(o=>o!==e);selP.delete(e.id)}
+function removeEnt(e){sel.delete(e.id);if(nodes[e.id]){nodes[e.id].remove();delete nodes[e.id]}D.ents=D.ents.filter(o=>o!==e);selP.delete(e.id)}
 function killPerson(e,txt){let msg=txt||('🐻 Медведь напал: погиб(ла) '+e.name+' 💔');
  const fid=e.fam,adult=e.k==='man'||e.k==='woman';removeEnt(e);
  if(fid&&adult){D.ents.forEach(o=>{if(o.fam===fid)delete o.fam});D.fams=D.fams.filter(f=>f.id!==fid);if(selF===fid)selF=null;msg+='. Семья распалась'}
@@ -410,19 +423,23 @@ function sendBear(){if(!D.ents.some(e=>e.k==='fence')&&!D.ents.some(e=>IT[e.k].p
  const cols=Object.keys(D.land).filter(k=>D.land[k]).map(k=>+k.split(',')[0]),c=cols[Math.random()*cols.length|0],sd=Math.random()*4|0;
  const dx=sd===0?1:sd===1?-1:0,dy=sd===2?1:sd===3?-1:0;
  const x=sd===0?-3:sd===1?103:c*50+8+Math.random()*34,y=sd===2?-3:sd===3?103:r*50+8+Math.random()*34;
- const el=document.createElement('div');el.className='bear';el.textContent='🐻';el.style.left=x+'%';el.style.top=y+'%';field.appendChild(el);
+ const el=document.createElement('div');el.className='bear';el.innerHTML='🐻<span class="bodds"></span>';el.style.left=x+'%';el.style.top=y+'%';field.appendChild(el);
  ev.bear={el,x,y,dx,dy,t:35,fight:null};
  toast('🐻 Медведь вышел из леса '+['слева','справа','сверху','снизу'][sd]+'! Забор на его пути остановит его, а охотник перехватит')}
-function startFight(h){const b=ev.bear;b.fight={h,t:2.5};b.el.classList.add('fight');nodes[h.id].classList.add('fight');
- const r=b.el.getBoundingClientRect();pop(field,r.left+r.width/2,r.top+r.height/2,'⚔️');toast('🏹 '+h.name+' вступил(а) в схватку с медведем! Шансы 50 на 50')}
-function endFight(){const b=ev.bear,h=b.fight.h;b.fight=null;if(nodes[h.id])nodes[h.id].classList.remove('fight');
- if(Math.random()<.5){b.el.remove();ev.bear=null;toast('🏹 '+h.name+' победил(а): медведь убежал в лес 🐻💨')}
- else{h.hurt=40;b.el.classList.remove('fight');toast('🩹 Медведь оказался сильнее: '+h.name+' ранен(а) на 40 секунд')}}
+function endFight(){const b=ev.bear,f=b.fight,hs=[...f.hs].map(id=>D.ents.find(o=>o.id===id)).filter(Boolean);b.fight=null;
+ hs.forEach(h=>{if(nodes[h.id])nodes[h.id].classList.remove('fight')});b.el.classList.remove('fight');b.el.querySelector('.bodds').textContent='';
+ const pb=Math.pow(.5,Math.max(1,hs.length));
+ if(Math.random()>=pb){b.el.remove();ev.bear=null;toast('🏹 '+(hs.length>1?'Охотники победили':(hs[0]?hs[0].name+' победил(а)':'Охотник победил'))+': медведь убежал в лес 🐻💨')}
+ else{let dead=0;hs.forEach(h=>{if(Math.random()<.4){dead++;killPerson(h,'💀 '+h.name+' погиб(ла) в схватке с медведем')}else h.hurt=40});
+  toast('🐻 Медведь оказался сильнее'+(dead?': погибших охотников '+dead:'')+'; остальные ранены на 40 секунд')}}
 function bearLogic(dt){const b=ev.bear,W=field.offsetWidth||1400,H=field.offsetHeight||1000;
- if(b.fight){b.fight.t-=dt;if(b.fight.t<=0)endFight();return}
+ const dd=e=>Math.hypot((e.x-b.x)*W/100,(e.y-b.y)*H/100);
+ D.ents.forEach(h=>{if(h.k!=='hunter'||h.hurt>0||!nodes[h.id]||(drag&&drag.ent===h))return;const d=dd(h);if(d>=BVIEW)return;
+  if(d<42){if(!b.fight){b.fight={t:4,hs:new Set()};b.el.classList.add('fight');const r=b.el.getBoundingClientRect();pop(field,r.left+r.width/2,r.top+r.height/2,'⚔️');toast('🏹 '+h.name+' вступил(а) в схватку с медведем!')}
+   if(!b.fight.hs.has(h.id)){b.fight.hs.add(h.id);nodes[h.id].classList.add('fight');if(b.fight.hs.size>1)toast('🏹 '+h.name+' присоединился(ась) к схватке!')}}
+  else if(!(b.fight&&b.fight.hs.has(h.id))){const k=Math.min(1,150*dt/d);h.x+=(b.x-h.x)*k;h.y+=(b.y-h.y)*k;nodes[h.id].classList.add('walk');placeEl(nodes[h.id],h)}});
+ if(b.fight){b.fight.t-=dt;b.el.querySelector('.bodds').textContent='шанс медведя '+Math.round(Math.pow(.5,Math.max(1,b.fight.hs.size))*100)+'%';if(b.fight.t<=0)endFight();return}
  b.t-=dt;
- let h=null,hd=1e9;D.ents.forEach(e=>{if(e.k!=='hunter'||e.hurt>0||!nodes[e.id]||(drag&&drag.ent===e))return;const d=Math.hypot((e.x-b.x)*W/100,(e.y-b.y)*H/100);if(d<hd){hd=d;h=e}});
- if(h&&hd<BVIEW){if(hd<42)return startFight(h);const k=Math.min(1,150*dt/hd);h.x+=(b.x-h.x)*k;h.y+=(b.y-h.y)*k;nodes[h.id].classList.add('walk');placeEl(nodes[h.id],h)}
  let tg=null,td=1e9;D.ents.forEach(e=>{if(!IT[e.k].ppl||e.k==='pet')return;const d=Math.hypot((e.x-b.x)*W/100,(e.y-b.y)*H/100);if(d<td){td=d;tg=e}});
  let vx=b.dx,vy=b.dy;if(tg&&td<BVIEW){const n=Math.max(1,td);vx=(tg.x-b.x)*W/100/n;vy=(tg.y-b.y)*H/100/n}
  const fa=D.ents.filter(e=>{if(e.k!=='fence')return false;const dx=(e.x-b.x)*W/100,dy=(e.y-b.y)*H/100,al=dx*vx+dy*vy,la=Math.abs(-dx*vy+dy*vx);return al>-10&&al<60&&la<40});
@@ -452,7 +469,7 @@ function deleteEnt(e){const d=IT[e.k];let msg=(d.ppl?e.name:d.n)+' удалён(
  C=counts();toast('🗑️ '+msg+'. Возвращено: '+rfText(rf));renderUp();if(shop)renderShop()}
 let modalYes=null,modalNo=null;
 function ask(t,p,label,yes,no){$('mt').textContent=t;$('mp').textContent=p;$('yes').textContent=label;modalYes=yes;modalNo=no||null;$('modal').classList.add('on')}
-function pickWant(k){return k==='pet'?'petfood':['bread','meat','milk','fish'][Math.random()*4|0]}
+function pickWant(k){return k==='pet'?'petfood':(Math.random()<.1?'fish':['bread','meat','milk'][Math.random()*3|0])}
 function feed(k,e){let best=null,bd=1e9;
  D.ents.forEach(p=>{if(!IT[p.k].ppl||!nodes[p.id])return;const r=nodes[p.id].getBoundingClientRect(),cx=(r.left+r.right)/2,cy=(r.top+r.bottom)/2,d=Math.hypot(e.clientX-cx,e.clientY-cy);if(d<Math.max(40,r.width/2+14)&&d<bd){bd=d;best=p}});
  if(!best)return;const p=best,pet=p.k==='pet';
@@ -509,8 +526,16 @@ function sim(dt){
  const tents=D.ents.filter(e=>e.k==='tent'),tk={};
  ppl.forEach(e=>{if(e.k!=='fisher')return;if(e.tent!=null&&tents.some(t=>t.id===e.tent)&&!tk[e.tent])tk[e.tent]=1;else e.tent=null});
  ppl.forEach(e=>{if(e.k==='fisher'&&e.tent==null){const t=tents.find(t=>!tk[t.id]);if(t){e.tent=t.id;tk[t.id]=1}}});
+ const ponds=D.ents.filter(e=>e.k==='pond'),pcn={};
+ ppl.forEach(e=>{if(e.k!=='fisher')return;if(e.pond!=null&&ponds.some(p=>p.id===e.pond)&&(pcn[e.pond]||0)<3)pcn[e.pond]=(pcn[e.pond]||0)+1;else e.pond=null});
+ ppl.forEach(e=>{if(e.k==='fisher'&&e.pond==null){const p=ponds.find(p=>(pcn[p.id]||0)<3);if(p){e.pond=p.id;pcn[p.id]=(pcn[p.id]||0)+1}}});
  let ok=0;const bad=[],dead=[];
  ppl.forEach(e=>{const pet=e.k==='pet';
+  if(!pet){e.age=(e.age||0)+dt;
+   if(e.k==='child'&&e.age>=900){const nk=Math.random()<.5?'man':'woman';e.k=nk;e.age=0;delete e.fam;e.job=null;
+    const n0=nodes[e.id];if(n0){n0.dataset.k=nk;n0.querySelector('.em').textContent=IT[nk].e}
+    toast('🎉 '+e.name+' вырос(ла) и стал(а) взрослым');relabel();if(shop&&cat==='fam')renderFam()}
+   else if(e.k!=='child'&&e.k!=='hunter'&&e.age>=900){e.why='age';dead.push(e)}}
   if(e.k==='fisher'){e.c=null;e.idle=false;ok++;
    if(e.tent==null)e.tl=(e.tl||0)+dt;else e.tl=Math.max(0,(e.tl||0)-2*dt);
    const fd=e.tl>=144;if(e.tl>=240){e.why='tent';dead.push(e)}
@@ -518,9 +543,9 @@ function sim(dt){
    const un=!(e.pond!=null&&D.ents.some(o=>o.id===e.pond)),t0=fd?'☠️⛺':(e.tent==null?'⛺?':(un?'🏞️?':'')),b0=nodes[e.id]&&nodes[e.id].querySelector('.bub');
    if(b0){b0.textContent=t0;b0.classList.toggle('on',!!t0);b0.classList.toggle('red',fd)}if(nodes[e.id])nodes[e.id].classList.toggle('danger',fd);return}
   if(pet){e.bt=(e.bt==null?8+Math.random()*30:e.bt)-dt;if(e.bt<=0){e.bark=2.5;e.bt=25+Math.random()*35}}
-  if(e.hurt>0)e.hurt-=dt;e.hunger=Math.max(0,e.hunger-.4*dt);if(!pet)e.fun=Math.max(0,e.fun-(e.fr||.15)*(e.frm||1)*dt);
+  if(e.hurt>0)e.hurt-=dt;e.hunger=Math.max(0,e.hunger-(e.hr||.4)*dt);if(!pet)e.fun=Math.max(0,e.fun-(e.fr||.15)*(e.frm||1)*dt);
   if(!e.want)e.want=pickWant(e.k);
-  if(D.auto&&D.autoOn&&e.hunger<=70){const ty=pet?['petfood']:['bread','meat','milk','fish'],k=D.food[e.want]>0?e.want:ty.find(t=>D.food[t]>0);
+  if(D.auto&&D.autoOn&&e.hunger<=70){const ty=pet?['petfood']:['bread','meat','milk'],k=D.food[e.want]>0?e.want:ty.find(t=>D.food[t]>0);
    if(k){D.food[k]--;e.nofood=0;e.hunger=Math.min(100,e.hunger+IT[k].fill);e.want=pickWant(e.k)}
    else if(Date.now()-lastEmpty>60000){lastEmpty=Date.now();toast('ℹ️ Склад пуст: автокормление не может накормить жителей. Купи продукты')}}
   e.idle=e.hunger<30||(!pet&&e.fun<30);
@@ -540,8 +565,9 @@ function sim(dt){
   else if(e.k==='hunter'){c=null}
   else{const cn=conn[e.home];c=lack||((off||!(cn&&cn.power))?'power':null)||(e.fun<30?'fun':null)}
   e.c=c;if(!c)ok++;else bad.push(e);
-  const b=nodes[e.id]&&nodes[e.id].querySelector('.bub');let ic=(e.hunger<50&&(!c||c==='food'||c==='petfood'))?ICO[e.want]:(c?ICO[c]:'');if(e.bark>0){ic='гав-гав';e.bark-=dt}if(dg)ic='☠️'+ICO[e.why];const nd2=nodes[e.id];if(nd2)nd2.classList.toggle('danger',dg);if(b){b.textContent=ic;b.classList.toggle('on',!!ic);b.classList.toggle('red',dg)}});
- dead.forEach(e=>killPerson(e,'💀 '+e.name+' умер(ла): '+WHY[e.why]));
+  const b=nodes[e.id]&&nodes[e.id].querySelector('.bub');let ic=(e.hunger<50&&(!c||c==='food'||c==='petfood'))?ICO[e.want]:(c?ICO[c]:'');if(!pet&&e.k!=='child'&&e.k!=='hunter'&&e.age>=840&&!ic)ic='🕰️';
+  if(e.bark>0){ic='гав-гав';e.bark-=dt}if(dg)ic='☠️'+ICO[e.why];const nd2=nodes[e.id];if(nd2)nd2.classList.toggle('danger',dg);if(b){b.textContent=ic;b.classList.toggle('on',!!ic);b.classList.toggle('red',dg)}});
+ [...new Set(dead)].forEach(e=>killPerson(e,'💀 '+e.name+' умер(ла): '+WHY[e.why]));
  const pc={};D.ents.forEach(e=>{if(e.k==='fisher'&&e.pond!=null)pc[e.pond]=(pc[e.pond]||0)+1});
  let fr=0;D.ents.forEach(e=>{if(e.k==='pond'){fr+=pc[e.id]||0;const bg=nodes[e.id]&&nodes[e.id].querySelector('.wk');if(bg)bg.textContent='🎣'+(pc[e.id]||0)}});
  D.fishAcc=(D.fishAcc||0)+fr*.05*dt;if(D.fishAcc>=1){const n=Math.floor(D.fishAcc);D.fishAcc-=n;D.food.fish+=n}
@@ -576,11 +602,18 @@ setInterval(()=>{const n=Date.now(),dt=Math.min((n-last)/1000,2);last=n;sim(dt);
 document.addEventListener('visibilitychange',save);
 
 // перетаскивание
-field.addEventListener('pointerdown',e=>{const el=e.target.closest('.ent');if(!el){if(e.pointerType==='mouse'&&!e.target.closest('.buyland')){pan={x:e.clientX,y:e.clientY,l:vp.scrollLeft,t:vp.scrollTop};vp.style.cursor='grabbing';field.setPointerCapture(e.pointerId)}return}
- const en0=D.ents.find(o=>o.id==el.dataset.id);en0.ride=null;en0.back=null;drag={el,ent:en0,ox:en0.x,oy:en0.y,cx:e.clientX,cy:e.clientY};el.setPointerCapture(e.pointerId);el.classList.add('drag');el.classList.remove('walk');$('trash').classList.add('on')});
-field.addEventListener('pointermove',e=>{if(pan){vp.scrollLeft=pan.l-(e.clientX-pan.x);vp.scrollTop=pan.t-(e.clientY-pan.y);return}if(!drag)return;const r=field.getBoundingClientRect(),en=drag.ent;
- en.x=Math.min(97,Math.max(3,(e.clientX-r.left)/r.width*100));en.y=Math.min(95,Math.max(5,(e.clientY-r.top)/r.height*100));placeEl(drag.el,en);$('trash').classList.toggle('hot',overTrash(e))});
-const endDrag=(e,drop)=>{if(!drag)return;const{el,ent,ox,oy,cx,cy}=drag;drag=null;el.classList.remove('drag');$('trash').classList.remove('on','hot');
+field.addEventListener('pointerdown',e=>{const el=e.target.closest('.ent');if(!el){if(selMode&&!e.target.closest('.buyland')){marqStart(e);return}if(e.pointerType==='mouse'&&!e.target.closest('.buyland')){pan={x:e.clientX,y:e.clientY,l:vp.scrollLeft,t:vp.scrollTop};vp.style.cursor='grabbing';field.setPointerCapture(e.pointerId)}return}
+ const en0=D.ents.find(o=>o.id==el.dataset.id);en0.ride=null;en0.back=null;drag={el,ent:en0,ox:en0.x,oy:en0.y,cx:e.clientX,cy:e.clientY};
+ if(sel.has(en0.id)&&sel.size>1)drag.group=[...sel].map(id=>D.ents.find(o=>o.id===id)).filter(Boolean).map(o=>({ent:o,ox:o.x,oy:o.y}));
+ else if(!sel.has(en0.id))clearSel();el.setPointerCapture(e.pointerId);el.classList.add('drag');el.classList.remove('walk');$('trash').classList.add('on')});
+field.addEventListener('pointermove',e=>{if(marq){marqMove(e);return}if(pan){vp.scrollLeft=pan.l-(e.clientX-pan.x);vp.scrollTop=pan.t-(e.clientY-pan.y);return}if(!drag)return;const r=field.getBoundingClientRect(),en=drag.ent;
+ en.x=Math.min(97,Math.max(3,(e.clientX-r.left)/r.width*100));en.y=Math.min(95,Math.max(5,(e.clientY-r.top)/r.height*100));placeEl(drag.el,en);if(drag.group){const ddx=en.x-drag.ox,ddy=en.y-drag.oy;drag.group.forEach(m=>{if(m.ent===en)return;m.ent.x=Math.min(97,Math.max(3,m.ox+ddx));m.ent.y=Math.min(95,Math.max(5,m.oy+ddy));placeEl(nodes[m.ent.id],m.ent)})}$('trash').classList.toggle('hot',overTrash(e))});
+const endDrag=(e,drop)=>{if(!drag)return;const{el,ent,ox,oy,cx,cy,group:grp}=drag;drag=null;el.classList.remove('drag');$('trash').classList.remove('on','hot');
+ if(grp&&drop&&Math.hypot(e.clientX-cx,e.clientY-cy)>=8){const list=grp.map(m=>m.ent),back=()=>grp.forEach(m=>{m.ent.x=m.ox;m.ent.y=m.oy;if(nodes[m.ent.id])placeEl(nodes[m.ent.id],m.ent)});
+  if(overTrash(e)){const tot={};list.forEach(o=>{const rf=refund(o.k);for(const r in rf)tot[r]=(tot[r]||0)+rf[r]});
+   ask('Продать '+list.length+' объектов?','Вернётся 75% базовой стоимости ('+rfText(tot)+').','Продать',()=>{list.forEach(o=>{if(D.ents.includes(o))deleteEnt(o)});clearSel()},back);return}
+  if(list.some(o=>!D.land[(o.x<50?0:1)+','+(o.y<50?0:1)])){back();toast('🔒 Эта территория не куплена');return}
+  return}
  if(drop&&overTrash(e)){const d=IT[ent.k];
   ask('Удалить '+(d.ppl?ent.name:d.n)+'?','Продажа: вернётся 75% базовой стоимости ('+rfText(refund(ent.k))+'). Остальное не возвращается.','Продать',()=>{if(D.ents.includes(ent))deleteEnt(ent)},()=>{ent.x=ox;ent.y=oy;if(nodes[ent.id])placeEl(nodes[ent.id],ent)});return}
 
@@ -605,14 +638,15 @@ const endDrag=(e,drop)=>{if(!drag)return;const{el,ent,ox,oy,cx,cy}=drag;drag=nul
  if(!a)return;
  if(ent.fun>70)return toast(ent.name+': пока не хочу кататься');
  ent.fun=100;ent.frm=FRM[a.k]||1;const fee=Math.round(IT[a.k].fee*mult());D.money+=fee;pop(field,e.clientX,e.clientY,'+'+fee+' 💰 😄')};
-field.addEventListener('pointerup',e=>{pan=null;vp.style.cursor='';endDrag(e,true)});
-field.addEventListener('pointercancel',e=>{pan=null;vp.style.cursor='';endDrag(e,false)});
+field.addEventListener('pointerup',e=>{if(marq)marqEnd();pan=null;vp.style.cursor='';endDrag(e,true)});
+field.addEventListener('pointercancel',e=>{if(marq){marq.el.remove();marq=null}pan=null;vp.style.cursor='';endDrag(e,false)});
 
 document.addEventListener('click',e=>{
  if(e.target.id==='yes'){const f=modalYes;modalYes=modalNo=null;$('modal').classList.remove('on');if(f)f();return}
  if(e.target.id==='no'||e.target.id==='modal'){const f=modalNo;modalYes=modalNo=null;$('modal').classList.remove('on');if(f)f();return}
  if(e.target.id==='autoBtn'){autoClick();return}
  if(e.target.id==='rideBtn'){rideClick();return}
+ if(e.target.id==='selBtn'){selMode=!selMode;field.style.touchAction=selMode?'none':'';$('selBtn').textContent='⬚ Выделение: '+(selMode?'вкл':'выкл');if(selMode)toast('Тяни по пустому месту, чтобы выделить объекты рамкой');else clearSel();return}
  if(e.target.id==='pf'){pondGuess('fish');return}
  if(e.target.id==='pe'){pondGuess('eagle');return}
  if(e.target.id==='px'){pondSell();return}
