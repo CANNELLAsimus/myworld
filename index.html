@@ -208,7 +208,7 @@ const counts=()=>{const c={};D.ents.forEach(e=>c[e.k]=(c[e.k]||0)+1);return c};
 const mult=()=>1+.2*(C.hut||0);
 const UPG={rod:{n:'Громоотвод',e:'🗼',max:4,costs:{3:750,4:2000},d:l=>`выдерживает ${l} уд. молнии`},
  house:{n:'Жилой дом',e:'🏠',max:7,costs:{5:1500,6:2000,7:2200},d:l=>`прописка до ${l} человек`},
- factory:{n:'Завод',e:'🏭',max:10,costs:{6:3000,7:4500,8:7000,9:10000,10:15000},d:l=>`${l} рабочих мест`}};
+ factory:{n:'Завод',e:'🏭',max:10,costs:{6:3000,7:4000,8:5000,9:6000,10:7000},d:l=>`${l} рабочих мест`}};
 const LAND={'0,1':0,'1,1':4000,'0,0':4000,'1,0':10000},DIR={'1,1':'вправо','0,0':'вверх','1,0':'по диагонали'};
 const LV0={rod:2,house:4,factory:5};
 const slotsOf=j=>j.k==='factory'?(j.lv||5):IT[j.k].slots;
@@ -442,12 +442,14 @@ function events(dt){
  if(D.peak>=500){if(ev.bear)bearLogic(dt);
   else{ev.bearT-=dt;if(ev.bearT<=0){ev.bearT=100+Math.random()*60;sendBear()}}}}
 const overTrash=e=>{const r=$('trash').getBoundingClientRect();return e.clientX>r.left-14&&e.clientX<r.right+14&&e.clientY>r.top-14&&e.clientY<r.bottom+14};
-function deleteEnt(e){const d=IT[e.k];let msg=(d.ppl?e.name:d.n)+' удалён(а)';
+const refund=k=>{const b=IT[k].b||{},o={};for(const r in b){const v=Math.floor(b[r]*.75);if(v>0)o[r]=v}return o};
+const rfText=o=>Object.keys(o).map(r=>fmt(o[r])+' '+{money:'💰',wood:'🪵',stone:'🪨'}[r]).join(' ')||'ничего';
+function deleteEnt(e){const d=IT[e.k];let msg=(d.ppl?e.name:d.n)+' удалён(а)';const rf=refund(e.k);for(const r in rf)D[r]+=rf[r];
  if(ev.burn&&ev.burn.id===e.id)ev.burn=null;
  if(d.ppl){const fid=e.fam,adult=e.k==='man'||e.k==='woman';removeEnt(e);
   if(fid&&adult){D.ents.forEach(o=>{if(o.fam===fid)delete o.fam});D.fams=D.fams.filter(f=>f.id!==fid);if(selF===fid)selF=null;msg+='. Семья распалась'}
   relabel()}else removeEnt(e);
- C=counts();toast('🗑️ '+msg);renderUp();if(shop)renderShop()}
+ C=counts();toast('🗑️ '+msg+'. Возвращено: '+rfText(rf));renderUp();if(shop)renderShop()}
 let modalYes=null,modalNo=null;
 function ask(t,p,label,yes,no){$('mt').textContent=t;$('mp').textContent=p;$('yes').textContent=label;modalYes=yes;modalNo=no||null;$('modal').classList.add('on')}
 function pickWant(k){return k==='pet'?'petfood':['bread','meat','milk','fish'][Math.random()*4|0]}
@@ -527,10 +529,10 @@ function sim(dt){
     if(ok0)e.sat[t]=360;else{e.sat[t]=Math.max(0,(e.sat[t]||0)-dt);if(!lack&&e.sat[t]<=0)lack=t}});
    if(e.grace>0)e.grace-=dt;if(lack){e.why=lack;if(!(e.grace>0))e.risk=(e.risk||0)+dt}else{e.risk=Math.max(0,(e.risk||0)-2*dt);if(!e.risk)e.warned=0}}
   if(!pet)e.nofood=(e.nofood||0)+dt;
-  if(!pet&&e.nofood>=252)e.why='food';
-  const dg=!pet&&((e.risk||0)>=LIMIT*.6||e.nofood>=252);
+  if(!pet&&e.nofood>=360)e.why='food';
+  const dg=!pet&&((e.risk||0)>=LIMIT*.6||e.nofood>=360);
   if(dg&&!e.warned){e.warned=1;toast('⚠️ '+e.name+' на грани смерти: '+WHY[e.why])}
-  if(!pet&&((e.risk||0)>=LIMIT||e.nofood>=420))dead.push(e);
+  if(!pet&&((e.risk||0)>=LIMIT||e.nofood>=600))dead.push(e);
   let c=null;
   if(e.hunger<30)c=pet?'petfood':'food';
   else if(e.hurt>0)c='hurt';
@@ -580,7 +582,7 @@ field.addEventListener('pointermove',e=>{if(pan){vp.scrollLeft=pan.l-(e.clientX-
  en.x=Math.min(97,Math.max(3,(e.clientX-r.left)/r.width*100));en.y=Math.min(95,Math.max(5,(e.clientY-r.top)/r.height*100));placeEl(drag.el,en);$('trash').classList.toggle('hot',overTrash(e))});
 const endDrag=(e,drop)=>{if(!drag)return;const{el,ent,ox,oy,cx,cy}=drag;drag=null;el.classList.remove('drag');$('trash').classList.remove('on','hot');
  if(drop&&overTrash(e)){const d=IT[ent.k];
-  ask('Удалить '+(d.ppl?ent.name:d.n)+'?','Деньги и ресурсы, потраченные на покупку, не вернутся.','Удалить',()=>{if(D.ents.includes(ent))deleteEnt(ent)},()=>{ent.x=ox;ent.y=oy;if(nodes[ent.id])placeEl(nodes[ent.id],ent)});return}
+  ask('Удалить '+(d.ppl?ent.name:d.n)+'?','Продажа: вернётся 75% базовой стоимости ('+rfText(refund(ent.k))+'). Остальное не возвращается.','Продать',()=>{if(D.ents.includes(ent))deleteEnt(ent)},()=>{ent.x=ox;ent.y=oy;if(nodes[ent.id])placeEl(nodes[ent.id],ent)});return}
 
  if(drop&&ent.k==='pond'&&Math.hypot(e.clientX-cx,e.clientY-cy)<8){openPond();return}
  if(drop&&UPG[ent.k]&&Math.hypot(e.clientX-cx,e.clientY-cy)<8&&!(ev.burn&&ev.burn.id===ent.id)){upgradeAsk(ent);return}
