@@ -133,7 +133,7 @@ h4{margin:10px 0 4px;font-size:14px;color:var(--yel)}
   </div>
   <div class="stats"><span id="st"></span><button id="reset">сброс</button></div>
   <div class="stats" id="fd"><span>Склад — перетащи еду на жителя:</span><span id="tray"></span></div>
-  <div class="stats links"><a href="https://t.me/d0briChannel" target="_blank" rel="noopener">✈️ Telegram</a><a href="https://www.youtube.com/channel/UCrkSFsLzw1F71iqmQpQIxjg" target="_blank" rel="noopener">▶️ YouTube</a><button id="autoBtn"></button><button id="rideBtn"></button><button id="selBtn">⬚ Выделение: выкл</button></div>
+  <div class="stats links"><a href="https://t.me/d0briChannel" target="_blank" rel="noopener">✈️ Telegram</a><a href="https://www.youtube.com/channel/UCrkSFsLzw1F71iqmQpQIxjg" target="_blank" rel="noopener">▶️ YouTube</a><button id="autoBtn"></button><button id="rideBtn"></button></div>
  </div>
  <main>
   <div id="village" class="screen on"><div id="world"></div></div>
@@ -210,7 +210,7 @@ const fmt=n=>{n=Math.floor(n);return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e4?(n/1e3
 const fmt1=n=>n<10?n.toFixed(1):fmt(n);
 const counts=()=>{const c={};D.ents.forEach(e=>c[e.k]=(c[e.k]||0)+1);return c};
 const mult=()=>1+.2*(C.hut||0);
-const sel=new Set();let selMode=false,marq=null;
+const sel=new Set();let selMode=false,marq=null,lp=null;
 function clearSel(){sel.clear();document.querySelectorAll('.ent.sel').forEach(n=>n.classList.remove('sel'))}
 function marqStart(e){const r=field.getBoundingClientRect();clearSel();marq={x0:e.clientX-r.left,y0:e.clientY-r.top,el:document.createElement('div')};marq.el.className='marq';field.appendChild(marq.el);field.setPointerCapture(e.pointerId)}
 function marqMove(e){const r=field.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top,m=marq;
@@ -257,11 +257,18 @@ function spawnPos(){const cx=(vp.scrollLeft+vp.clientWidth/2)/Math.max(1,field.o
 function cornerPos(){const cx=(vp.scrollLeft+vp.clientWidth/2)/Math.max(1,field.offsetWidth)*100,cy=(vp.scrollTop+vp.clientHeight/2)/Math.max(1,field.offsetHeight)*100;
  let k=(cx<50?0:1)+','+(cy<50?0:1);if(!D.land[k]){const a=Object.keys(D.land).filter(q=>D.land[q]);k=a[Math.random()*a.length|0]}
  const[c,r]=k.split(',').map(Number);return{x:c*50+43+Math.random()*4,y:r*50+42+Math.random()*3}}
+function fencePos(){const W=field.offsetWidth||1400,H=field.offsetHeight||1000,sx=34/W*100,sy=34/H*100,has=(c,r)=>!!D.land[c+','+r],out=[];
+ [3,6.5,10].forEach(ins=>Object.keys(D.land).filter(k=>D.land[k]).forEach(k=>{const[c,r]=k.split(',').map(Number),x0=c*50+ins,x1=c*50+50-ins,y0=r*50+ins,y1=Math.min(95,r*50+50-ins);
+  if(!has(c,r+1))for(let x=x1;x>=x0;x-=sx)out.push({x:Math.min(97,x),y:y1});
+  if(!has(c-1,r))for(let y=y1;y>=y0;y-=sy)out.push({x:x0,y});
+  if(!has(c,r-1))for(let x=x0;x<=x1;x+=sx)out.push({x,y:y0});
+  if(!has(c+1,r))for(let y=y0;y<=y1;y+=sy)out.push({x:x1,y})}));
+ const fs=D.ents.filter(e=>e.k==='fence'),f=out.find(p=>fs.every(q=>Math.hypot((q.x-p.x)*W/100,(q.y-p.y)*H/100)>=20));return f||cornerPos()}
 function mkEnt(e){const d=IT[e.k],el=document.createElement('div');
  el.className='ent'+(d.s?' sm':'')+(d.ppl?' p':'');el.dataset.id=e.id;el.dataset.k=e.k;
  el.innerHTML=`<span class="em">${e.k==='pond'?POND:d.e}</span>${d.slots||d.svc||e.k==='house'||e.k==='rod'||e.k==='pond'?'<span class="wk"></span>':''}`+(d.ppl?`<span class="bub"></span><span class="jb"></span><i class="nm">${e.name}</i>`:'');
  placeEl(el,e);field.appendChild(el);nodes[e.id]=el}
-function spawn(k){const d=IT[k],e={id:D.nid++,k,...(k==='fence'?cornerPos():spawnPos())};
+function spawn(k){const d=IT[k],e={id:D.nid++,k,...(k==='fence'?fencePos():spawnPos())};
  if(d.ppl){e.name=NAMES[k][Math.random()*NAMES[k].length|0];e.hunger=70+Math.random()*30;e.hr=.3+Math.random()*.2;e.fun=60+Math.random()*40;e.fr=.1+Math.random()*.12;e.want=pickWant(k);if(k!=='pet')e.grace=180}
  if(LV0[k])e.lv=LV0[k];if(k==='rod')e.hp=e.lv;
  D.ents.push(e);mkEnt(e);
@@ -283,7 +290,7 @@ function buy(k){
  if(!can(c))return toast('Не хватает ресурсов');
  for(const r in c)D[r]-=c[r];
  if(d.food){D.food[d.food]+=d.qty;toast('+'+d.qty+' порций на складе — перетащи еду из «Склада» на жителя')}
- else{spawn(k);toast(k==='fence'?'🚧 Забор появился в правом нижнем углу — перетащи его на нужное место':d.n+' появился(ась) в деревне — перетащи на нужное место')}
+ else{spawn(k);toast(k==='fence'?'🚧 Забор встал в ряд по краю территории — можно перетащить его куда нужно':d.n+' появился(ась) в деревне — перетащи на нужное место')}
  C=counts();renderShop();renderUp()}
 
 function renderShop(){
@@ -459,7 +466,7 @@ function events(dt){
  if(D.peak>=500){if(ev.bear)bearLogic(dt);
   else{ev.bearT-=dt;if(ev.bearT<=0){ev.bearT=100+Math.random()*60;sendBear()}}}}
 const overTrash=e=>{const r=$('trash').getBoundingClientRect();return e.clientX>r.left-14&&e.clientX<r.right+14&&e.clientY>r.top-14&&e.clientY<r.bottom+14};
-const refund=k=>{const b=IT[k].b||{},o={};for(const r in b){const v=Math.floor(b[r]*.75);if(v>0)o[r]=v}return o};
+const refund=k=>{const m=Math.floor(((IT[k].b||{}).money||0)*.75);return m>0?{money:m}:{}};
 const rfText=o=>Object.keys(o).map(r=>fmt(o[r])+' '+{money:'💰',wood:'🪵',stone:'🪨'}[r]).join(' ')||'ничего';
 function deleteEnt(e){const d=IT[e.k];let msg=(d.ppl?e.name:d.n)+' удалён(а)';const rf=refund(e.k);for(const r in rf)D[r]+=rf[r];
  if(ev.burn&&ev.burn.id===e.id)ev.burn=null;
@@ -475,7 +482,7 @@ function feed(k,e){let best=null,bd=1e9;
  if(!best)return;const p=best,pet=p.k==='pet';
  if(pet?k!=='petfood':k==='petfood')return toast(pet?p.name+' ест только корм 🦴':p.name+' не ест корм для питомцев');
  if(p.hunger>70)return toast(p.name+' пока не голоден(на)');
- if(p.want!==k)return toast(`${p.name} не хочет ${ICO[k]} — хочет ${ICO[p.want]}`);
+ if(p.want!==k&&!(k==='fish'&&!pet))return toast(`${p.name} не хочет ${ICO[k]} — хочет ${ICO[p.want]}`);
  D.food[k]--;p.nofood=0;p.hunger=Math.min(100,p.hunger+IT[k].fill);p.want=pickWant(p.k);
  pop(field,e.clientX,e.clientY,'😋 '+ICO[k]);toast(p.name+' поел(а) '+ICO[k])}
 let fdrag=null;
@@ -545,7 +552,7 @@ function sim(dt){
   if(pet){e.bt=(e.bt==null?8+Math.random()*30:e.bt)-dt;if(e.bt<=0){e.bark=2.5;e.bt=25+Math.random()*35}}
   if(e.hurt>0)e.hurt-=dt;e.hunger=Math.max(0,e.hunger-(e.hr||.4)*dt);if(!pet)e.fun=Math.max(0,e.fun-(e.fr||.15)*(e.frm||1)*dt);
   if(!e.want)e.want=pickWant(e.k);
-  if(D.auto&&D.autoOn&&e.hunger<=70){const ty=pet?['petfood']:['bread','meat','milk'],k=D.food[e.want]>0?e.want:ty.find(t=>D.food[t]>0);
+  if(D.auto&&D.autoOn&&e.hunger<=70){const k=D.food[e.want]>0?e.want:((!pet&&D.food.fish>0)?'fish':null);
    if(k){D.food[k]--;e.nofood=0;e.hunger=Math.min(100,e.hunger+IT[k].fill);e.want=pickWant(e.k)}
    else if(Date.now()-lastEmpty>60000){lastEmpty=Date.now();toast('ℹ️ Склад пуст: автокормление не может накормить жителей. Купи продукты')}}
   e.idle=e.hunger<30||(!pet&&e.fun<30);
@@ -602,20 +609,23 @@ setInterval(()=>{const n=Date.now(),dt=Math.min((n-last)/1000,2);last=n;sim(dt);
 document.addEventListener('visibilitychange',save);
 
 // перетаскивание
-field.addEventListener('pointerdown',e=>{const el=e.target.closest('.ent');if(!el){if(selMode&&!e.target.closest('.buyland')){marqStart(e);return}if(e.pointerType==='mouse'&&!e.target.closest('.buyland')){pan={x:e.clientX,y:e.clientY,l:vp.scrollLeft,t:vp.scrollTop};vp.style.cursor='grabbing';field.setPointerCapture(e.pointerId)}return}
+field.addEventListener('touchmove',e=>{if(marq)e.preventDefault()},{passive:false});
+field.addEventListener('pointerdown',e=>{const el=e.target.closest('.ent');if(!el){if(e.target.closest('.buyland'))return;
+  if(e.pointerType==='mouse'){if(e.shiftKey){pan={x:e.clientX,y:e.clientY,l:vp.scrollLeft,t:vp.scrollTop};vp.style.cursor='grabbing';field.setPointerCapture(e.pointerId)}else marqStart(e);return}
+  lp={x:e.clientX,y:e.clientY,e,timer:setTimeout(()=>{if(lp){marqStart(lp.e);lp=null}},450)};return}
  const en0=D.ents.find(o=>o.id==el.dataset.id);en0.ride=null;en0.back=null;drag={el,ent:en0,ox:en0.x,oy:en0.y,cx:e.clientX,cy:e.clientY};
  if(sel.has(en0.id)&&sel.size>1)drag.group=[...sel].map(id=>D.ents.find(o=>o.id===id)).filter(Boolean).map(o=>({ent:o,ox:o.x,oy:o.y}));
  else if(!sel.has(en0.id))clearSel();el.setPointerCapture(e.pointerId);el.classList.add('drag');el.classList.remove('walk');$('trash').classList.add('on')});
-field.addEventListener('pointermove',e=>{if(marq){marqMove(e);return}if(pan){vp.scrollLeft=pan.l-(e.clientX-pan.x);vp.scrollTop=pan.t-(e.clientY-pan.y);return}if(!drag)return;const r=field.getBoundingClientRect(),en=drag.ent;
+field.addEventListener('pointermove',e=>{if(lp&&Math.hypot(e.clientX-lp.x,e.clientY-lp.y)>10){clearTimeout(lp.timer);lp=null}if(marq){marqMove(e);return}if(pan){vp.scrollLeft=pan.l-(e.clientX-pan.x);vp.scrollTop=pan.t-(e.clientY-pan.y);return}if(!drag)return;const r=field.getBoundingClientRect(),en=drag.ent;
  en.x=Math.min(97,Math.max(3,(e.clientX-r.left)/r.width*100));en.y=Math.min(95,Math.max(5,(e.clientY-r.top)/r.height*100));placeEl(drag.el,en);if(drag.group){const ddx=en.x-drag.ox,ddy=en.y-drag.oy;drag.group.forEach(m=>{if(m.ent===en)return;m.ent.x=Math.min(97,Math.max(3,m.ox+ddx));m.ent.y=Math.min(95,Math.max(5,m.oy+ddy));placeEl(nodes[m.ent.id],m.ent)})}$('trash').classList.toggle('hot',overTrash(e))});
 const endDrag=(e,drop)=>{if(!drag)return;const{el,ent,ox,oy,cx,cy,group:grp}=drag;drag=null;el.classList.remove('drag');$('trash').classList.remove('on','hot');
  if(grp&&drop&&Math.hypot(e.clientX-cx,e.clientY-cy)>=8){const list=grp.map(m=>m.ent),back=()=>grp.forEach(m=>{m.ent.x=m.ox;m.ent.y=m.oy;if(nodes[m.ent.id])placeEl(nodes[m.ent.id],m.ent)});
   if(overTrash(e)){const tot={};list.forEach(o=>{const rf=refund(o.k);for(const r in rf)tot[r]=(tot[r]||0)+rf[r]});
-   ask('Продать '+list.length+' объектов?','Вернётся 75% базовой стоимости ('+rfText(tot)+').','Продать',()=>{list.forEach(o=>{if(D.ents.includes(o))deleteEnt(o)});clearSel()},back);return}
+   ask('Продать '+list.length+' объектов?','Вернётся 75% базовой стоимости только деньгами ('+rfText(tot)+'). Дерево и камень не возвращаются.','Продать',()=>{list.forEach(o=>{if(D.ents.includes(o))deleteEnt(o)});clearSel()},back);return}
   if(list.some(o=>!D.land[(o.x<50?0:1)+','+(o.y<50?0:1)])){back();toast('🔒 Эта территория не куплена');return}
   return}
  if(drop&&overTrash(e)){const d=IT[ent.k];
-  ask('Удалить '+(d.ppl?ent.name:d.n)+'?','Продажа: вернётся 75% базовой стоимости ('+rfText(refund(ent.k))+'). Остальное не возвращается.','Продать',()=>{if(D.ents.includes(ent))deleteEnt(ent)},()=>{ent.x=ox;ent.y=oy;if(nodes[ent.id])placeEl(nodes[ent.id],ent)});return}
+  ask('Удалить '+(d.ppl?ent.name:d.n)+'?','Продажа: вернётся 75% базовой стоимости только деньгами ('+rfText(refund(ent.k))+'). Дерево и камень не возвращаются.','Продать',()=>{if(D.ents.includes(ent))deleteEnt(ent)},()=>{ent.x=ox;ent.y=oy;if(nodes[ent.id])placeEl(nodes[ent.id],ent)});return}
 
  if(drop&&ent.k==='pond'&&Math.hypot(e.clientX-cx,e.clientY-cy)<8){openPond();return}
  if(drop&&UPG[ent.k]&&Math.hypot(e.clientX-cx,e.clientY-cy)<8&&!(ev.burn&&ev.burn.id===ent.id)){upgradeAsk(ent);return}
@@ -638,15 +648,14 @@ const endDrag=(e,drop)=>{if(!drag)return;const{el,ent,ox,oy,cx,cy,group:grp}=dra
  if(!a)return;
  if(ent.fun>70)return toast(ent.name+': пока не хочу кататься');
  ent.fun=100;ent.frm=FRM[a.k]||1;const fee=Math.round(IT[a.k].fee*mult());D.money+=fee;pop(field,e.clientX,e.clientY,'+'+fee+' 💰 😄')};
-field.addEventListener('pointerup',e=>{if(marq)marqEnd();pan=null;vp.style.cursor='';endDrag(e,true)});
-field.addEventListener('pointercancel',e=>{if(marq){marq.el.remove();marq=null}pan=null;vp.style.cursor='';endDrag(e,false)});
+field.addEventListener('pointerup',e=>{if(marq)marqEnd();if(lp){clearTimeout(lp.timer);lp=null;clearSel()}pan=null;vp.style.cursor='';endDrag(e,true)});
+field.addEventListener('pointercancel',e=>{if(marq){marq.el.remove();marq=null}if(lp){clearTimeout(lp.timer);lp=null}pan=null;vp.style.cursor='';endDrag(e,false)});
 
 document.addEventListener('click',e=>{
  if(e.target.id==='yes'){const f=modalYes;modalYes=modalNo=null;$('modal').classList.remove('on');if(f)f();return}
  if(e.target.id==='no'||e.target.id==='modal'){const f=modalNo;modalYes=modalNo=null;$('modal').classList.remove('on');if(f)f();return}
  if(e.target.id==='autoBtn'){autoClick();return}
  if(e.target.id==='rideBtn'){rideClick();return}
- if(e.target.id==='selBtn'){selMode=!selMode;field.style.touchAction=selMode?'none':'';$('selBtn').textContent='⬚ Выделение: '+(selMode?'вкл':'выкл');if(selMode)toast('Тяни по пустому месту, чтобы выделить объекты рамкой');else clearSel();return}
  if(e.target.id==='pf'){pondGuess('fish');return}
  if(e.target.id==='pe'){pondGuess('eagle');return}
  if(e.target.id==='px'){pondSell();return}
