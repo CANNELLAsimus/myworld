@@ -20,7 +20,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--txt);font-family
 main{flex:1;position:relative;min-height:0}
 .screen{position:absolute;inset:0;display:none}
 .screen.on{display:block}
-#village{overflow:auto;scrollbar-width:thin;background:#0a2216}
+#village{overflow:auto;scrollbar-width:thin;background:var(--bg)}
 #world{position:relative;width:200%;height:200%;isolation:isolate;touch-action:pan-x pan-y;background:var(--field) repeating-linear-gradient(45deg,#ffffff07 0 12px,transparent 12px 24px)}
 .ent{position:absolute;transform:translate(-50%,-50%);cursor:grab;touch-action:none;text-align:center;line-height:1}
 .ent .em{font-size:38px;display:block;filter:drop-shadow(0 2px 2px #0008)}
@@ -120,6 +120,8 @@ h4{margin:10px 0 4px;font-size:14px;color:var(--yel)}
 .ent.sel .em{filter:drop-shadow(0 0 7px #60a5fa) drop-shadow(0 0 3px #60a5fa)}
 .bodds{position:absolute;left:50%;top:-16px;transform:translateX(-50%);font-size:12px;font-weight:800;background:var(--ui);border:1px solid var(--bad);border-radius:8px;padding:0 5px;white-space:nowrap}
 .bodds:empty{display:none}
+.gear{background:var(--ui2);border:1px solid var(--line);border-radius:10px;color:#9ca3af;font-size:22px;line-height:1;padding:0 10px;cursor:pointer}
+#sc,#sp{flex-wrap:wrap;justify-content:center}
 :focus-visible{outline:2px solid var(--blue2);outline-offset:2px}
 </style>
 </head>
@@ -130,10 +132,11 @@ h4{margin:10px 0 4px;font-size:14px;color:var(--yel)}
    <div class="res"><span>💰</span><b id="rm">0</b></div>
    <div class="res"><span>🪵</span><b id="rw">0</b></div>
    <div class="res"><span>🪨</span><b id="rs">0</b></div>
+   <button id="gear" class="gear" aria-label="Настройки">⚙︎</button>
   </div>
   <div class="stats"><span id="st"></span><button id="reset">сброс</button></div>
   <div class="stats" id="fd"><span>Склад — перетащи еду на жителя:</span><span id="tray"></span></div>
-  <div class="stats links"><a href="https://t.me/d0briChannel" target="_blank" rel="noopener">✈️ Telegram</a><a href="https://www.youtube.com/channel/UCrkSFsLzw1F71iqmQpQIxjg" target="_blank" rel="noopener">▶️ YouTube</a><button id="autoBtn"></button><button id="rideBtn"></button></div>
+  <div class="stats links"><a href="https://t.me/ERRORprojectS" target="_blank" rel="noopener">✈️ Telegram</a><a href="https://www.youtube.com/channel/UCrkSFsLzw1F71iqmQpQIxjg" target="_blank" rel="noopener">▶️ YouTube</a><button id="autoBtn"></button><button id="rideBtn"></button></div>
  </div>
  <main>
   <div id="village" class="screen on"><div id="world"></div></div>
@@ -152,6 +155,7 @@ h4{margin:10px 0 4px;font-size:14px;color:var(--yel)}
 <div class="modal" id="modal"><div class="box"><b id="mt"></b><p id="mp"></p><div class="acts"><button class="gray" id="no">Отмена</button><button class="danger" id="yes">Да, сбросить</button></div></div></div>
 <div class="qd" id="qd"><b>💬 Цитата дня</b><span id="qt"></span></div>
 <div class="modal" id="pm"><div class="box"><b>🏞️ Водоём</b><p id="pmi"></p><p>Угадай, что выпадет:</p><div class="acts"><button id="pf">🐟 Рыба</button><button id="pe">🦅 Орёл</button></div><p id="pmr"></p><div class="acts"><button class="gray" id="px">Обменять 10 🐟 на 6% денег</button></div><div class="acts"><button class="gray" id="pc">Закрыть</button></div></div></div>
+<div class="modal" id="sm"><div class="box"><b>⚙️ Настройки</b><p>Цвет фона</p><div class="cats" id="sc"></div><p>Узор</p><div class="cats" id="sp"></div><div class="acts"><button class="gray" id="sx">Закрыть</button></div></div></div>
 <div class="toast" id="toast"></div>
 <script>
 const $=id=>document.getElementById(id);
@@ -161,7 +165,7 @@ rod:{c:'ind',n:'Громоотвод',e:'🗼',d:'Принимает на себ
 lodge:{c:'ind',n:'Охотничья хижина',e:'🛖',d:'Дом на 2 охотников, которые прогоняют медведей',b:{money:700,wood:120,stone:60},g:1.5},
 tent:{c:'util',n:'Палатка',e:'⛺',d:'Дом для 1 рыбака: 1 рыбак — 1 палатка. Без палатки рыбак живёт 4 минуты',b:{money:500},g:1},
 pond:{c:'ind',n:'Водоём',e:'🏞️',d:'До 3 рыбаков (перетащи рыбака на водоём) ловят бесплатную рыбу 🐟. Нажми на водоём: угадай рыба или орёл (+2 🐟 или −5% денег) и обменивай рыбу на деньги (10 🐟 = 6% баланса)',b:{money:600,wood:100,stone:60},g:1.5},
-fence:{c:'ind',n:'Забор',e:'🚧',d:'Защита от медведей: медведь, идущий на забор, ломает от 1 до 3 заборов. Каждый следующий забор дороже на 10 🪵 и 10 🪨. Максимум 404',b:{wood:60,stone:10},g:1,max:404,s:1},
+fence:{c:'ind',n:'Забор',e:'🚧',d:'Защита от медведей: медведь, идущий на забор, ломает от 1 до 3 заборов. Каждый следующий забор дороже на 10 🪵 и 10 🪨. Максимум 404',b:{wood:50,stone:40},g:1,max:404,s:1},
 hut:{c:'ind',n:'Здание строителей',e:'🏗️',d:'+20% к доходу и открывает аттракционы (до 3 шт.)',b:{money:800,wood:120,stone:80},g:2.8,max:3},
 workshop:{c:'ind',n:'Мастерская',e:'🛠️',d:'3 рабочих места, +2 💰/с за работника. Жителей назначают перетаскиванием на здание',b:{money:500,wood:60,stone:120},g:1.4,slots:3,per:2,res:'money'},
 factory:{c:'ind',n:'Завод',e:'🏭',d:'Рабочих мест по уровню (старт 5, максимум 10), +6 💰/с за работника. Нажми на завод, чтобы улучшить',b:{money:4000,wood:250,stone:700},g:1.4,slots:5,per:6,res:'money'},
@@ -199,8 +203,10 @@ const BVIEW=230,LIMIT=480,WHY={age:'старость',tent:'нет палатк�
 const QUOTES=['Маленький шаг сегодня лучше большого плана завтра.', 'Каждая великая деревня начиналась с одного забора.', 'Упорство важнее таланта, когда талант отдыхает.', 'Не торопись — главное, чтобы ты двигался вперёд.', 'Сегодня отличный день, чтобы построить что-то новое.', 'Ошибка — это просто урок в красивой упаковке.', 'Чем больше дел начато, тем меньше шансов остаться на месте.', 'Терпение — это тоже работа.', 'Сильная команда начинается с одного доброго слова.', 'Не жди идеального момента — создай его.', 'Даже самый длинный путь состоит из обычных шагов.', 'Тот, кто копает глубже, находит больше.', 'Береги тех, кто рядом: они — твой главный ресурс.', 'Порядок в маленьком — спокойствие в большом.', 'Если трудно, значит, ты растёшь.', 'Хорошая идея любит действие.', 'Улыбнись: твоя деревня сегодня станет чуть лучше.', 'Лучшее время начать — сейчас.', 'Победа любит тех, кто не сдаётся после первой неудачи.', 'Умей отдыхать, но не забывай возвращаться к делу.', 'Знания — как инструменты: чем чаще используешь, тем острее.', 'Не сравнивай свой первый день с чужим сотым.', 'Доброта ничего не стоит, но многое меняет.', 'Каждый день — чистая страница.', 'Смелость — это делать шаг, даже когда страшно.', 'Кто ищет возможности, тот их находит.', 'Хороший лидер сначала заботится о людях.', 'Трудности временны, опыт остаётся навсегда.', 'Маленькие привычки строят большие результаты.', 'Не бойся менять план, бойся не иметь цели.', 'Тишина и труд рождают лучшие идеи.', 'Сегодня ты на шаг ближе к цели, чем вчера.', 'Секрет успеха — продолжать, когда другие остановились.', 'Береги время: оно строит больше, чем деньги.', 'Мечтай масштабно, действуй по шагам.', 'Дружба — самое надёжное здание в любой деревне.', 'Тот, кто учится, никогда не проигрывает полностью.', 'Спокойствие помогает увидеть решение там, где другие видят проблему.', 'Начни с малого — и продолжай до большого.', 'Чем крепче основа, тем выше можно строить.', 'Благодарность делает любой день светлее.', 'Верь в свой план и не забывай его проверять.'];
 const POND='<svg viewBox="0 0 100 70" width="104" height="73"><path d="M10 38C6 20 26 7 46 11C60 3 87 9 91 30C99 45 81 63 58 60C44 69 19 63 10 38Z" fill="#1e5fa8" stroke="#7cc4ff" stroke-width="3"/><path d="M26 28C34 20 48 20 56 25" fill="none" stroke="#b6e1ff" stroke-width="3" stroke-linecap="round" opacity=".7"/><path d="M52 44C60 40 72 41 78 46" fill="none" stroke="#b6e1ff" stroke-width="2.5" stroke-linecap="round" opacity=".5"/></svg>';
 const FRM={carousel:1,circus:.75,ferris:.55,coaster:.4};
+const BGC={blue:['Синий','#0f2747','#08182e'],burg:['Бордовый','#3a0f1e','#260a14'],green:['Тёмно-зелёный','#0f3321','#0a2216'],orange:['Тёмно-оранжевый','#4a2410','#2e160a'],yellow:['Тёмно-жёлтый','#4a3d0a','#2e2606']};
+const BGP={chess:['Шахматная доска','conic-gradient(#ffffff0a 25%,transparent 0 50%,#ffffff0a 0 75%,transparent 0) 0 0/48px 48px'],hor:['Горизонтальные линии','repeating-linear-gradient(0deg,#ffffff0d 0 2px,transparent 2px 24px)'],ver:['Вертикальные линии','repeating-linear-gradient(90deg,#ffffff0d 0 2px,transparent 2px 24px)'],dr:['Диагональ вправо','repeating-linear-gradient(45deg,#ffffff0a 0 12px,transparent 12px 24px)'],dl:['Диагональ влево','repeating-linear-gradient(-45deg,#ffffff0a 0 12px,transparent 12px 24px)']};
 const KEY='village-clicker-v3';
-const fresh=()=>({money:150,wood:20,stone:0,pick:1,axe:1,ents:[],fams:[],nid:1,peak:0,up:{rod:2,house:4,factory:5},land:{'0,1':1},auto:false,autoOn:false,autoRide:false,autoRideOn:false,ban:0,lbDay:'',quoteDay:'',banFix:1,food:{bread:0,meat:0,milk:0,fish:0,petfood:0}});
+const fresh=()=>({money:150,wood:20,stone:0,pick:1,axe:1,ents:[],fams:[],nid:1,peak:0,up:{rod:2,house:4,factory:5},land:{'0,1':1},auto:false,autoOn:false,autoRide:false,autoRideOn:false,ban:0,lbDay:'',quoteDay:'',banFix:1,bg:{c:'green',p:'dr'},food:{bread:0,meat:0,milk:0,fish:0,petfood:0}});
 let D=fresh();
 try{const s=JSON.parse(localStorage.getItem(KEY));if(s){const old=!s.land;D=Object.assign(fresh(),s);D.food=Object.assign(fresh().food,s.food);if(!s.banFix){D.ban=0;D.banFix=1}D.up=Object.assign({rod:2,house:4,factory:5},s.up);if(old){D.land={'0,1':1};(D.ents||[]).forEach(e=>{e.x=e.x/2;e.y=50+e.y/2})}}}catch(e){}
 D.ents=D.ents.filter(e=>IT[e.k]);
@@ -228,7 +234,7 @@ const slotsOf=j=>j.k==='factory'?(j.lv||5):IT[j.k].slots;
 const DYN={};
 function cost(k){
  if(k.startsWith('upg:')){const n=k.slice(4),u=UPG[n],l=D.up[n];return l>=u.max?{money:Infinity}:{money:u.costs[l+1]}}
- if(k==='fence'){const n=C.fence||0;return{wood:60+10*n,stone:10+10*n}}
+ if(k==='fence'){const n=C.fence||0;return{wood:50+10*n,stone:40+10*n}}
  if(k==='pick')return{money:Math.ceil(80*Math.pow(1.7,D.pick-1))};
  if(k==='axe')return{money:Math.ceil(100*Math.pow(1.7,D.axe-1))};
  const d=IT[k],n=d.food?0:(C[k]||0),c={};for(const r in d.b)c[r]=Math.ceil(d.b[r]*Math.pow(d.g,n));return c}
@@ -510,8 +516,12 @@ function autoClick(){if(D.auto){D.autoOn=!D.autoOn;autoBtn();return}
  ask('Купить автокормление?','Жители будут сами есть со склада, пока есть продукты. Продукты по-прежнему нужно покупать.','Купить за 5000 💰',()=>{if(D.money<5000)return;D.money-=5000;D.auto=D.autoOn=true;autoBtn();toast('🍽️ Автокормление включено')})}
 function dailyQuote(){const day=new Date().toLocaleDateString('sv');if(D.quoteDay===day)return;D.quoteDay=day;save();
  $('qt').textContent=QUOTES[Math.random()*QUOTES.length|0];const q=$('qd');q.classList.add('show');setTimeout(()=>q.classList.remove('show'),6000)}
+function applyBg(){D.bg=D.bg||{c:'green',p:'dr'};const c=BGC[D.bg.c]||BGC.green,p=BGP[D.bg.p]||BGP.dr,r=document.documentElement.style;
+ r.setProperty('--field',c[1]);r.setProperty('--bg',c[2]);field.style.background='var(--field) '+p[1]}
+function renderSet(){$('sc').innerHTML=Object.keys(BGC).map(k=>`<button data-bgc="${k}" class="${D.bg.c===k?'on':''}" style="border-left:14px solid ${BGC[k][1]}">${BGC[k][0]}</button>`).join('');
+ $('sp').innerHTML=Object.keys(BGP).map(k=>`<button data-bgp="${k}" class="${D.bg.p===k?'on':''}">${BGP[k][0]}</button>`).join('')}
 function doReset(){if(ev.bear)ev.bear.el.remove();ev={stormT:100,bearT:130,burn:null,bear:null,sw:0};
- const qd=D.quoteDay;D=fresh();D.quoteDay=qd;C={};nodes={};selP.clear();selF=null;field.innerHTML='';shop=false;cat='ind';renderZones();autoBtn();
+ const qd=D.quoteDay,bg0=D.bg;D=fresh();D.quoteDay=qd;D.bg=bg0||D.bg;C={};nodes={};selP.clear();selF=null;field.innerHTML='';shop=false;cat='ind';renderZones();autoBtn();applyBg();
  try{localStorage.removeItem(KEY)}catch(x){}
  setView('village');toast('Игра сброшена. Начни с ратуши: 🛒 → Промышленность')}
 function sim(dt){
@@ -591,17 +601,20 @@ function sim(dt){
  jobs.forEach(j=>{const d=IT[j.k],w=asg[j.id];slots+=slotsOf(j);used+=w;rate[d.res]+=(ws[j.id]||0)*d.per*fb;
   const nd=nodes[j.id];if(nd){nd.classList.toggle('busy',w>0);const bg=nd.querySelector('.wk');if(bg)bg.textContent=w+'/'+slotsOf(j)}});
  ppl.forEach(e=>{const jb=nodes[e.id]&&nodes[e.id].querySelector('.jb');if(!jb)return;const aid=e.k==='fisher'?e.pond:e.at;const j=aid!=null&&D.ents.find(o=>o.id===aid);jb.textContent=j?IT[j.k].e:'';jb.style.display=j?'block':'none'});
- const inc=rate.money*m;
+ const pp2=D.ents.filter(e=>IT[e.k].ppl&&e.k!=='pet'),TR=.3;let txs=0;
+ pp2.forEach(e=>{e.tx=Math.min(TR,(e.tx||0)+dt*TR/60);txs+=e.tx});
+ const tax=txs+Math.floor(pp2.length/10)*.5*(pp2.length?txs/(pp2.length*TR):0);
+ const inc=(rate.money+tax)*m;
  D.money+=(inc-up)*dt;off=false;if(D.money<=0){D.money=0;off=up>inc}
  D.wood+=rate.wood*m*dt;D.stone+=rate.stone*m*dt;
  events(dt);
- ST={inc,up,mood:ppl.length?Math.round(ok/ppl.length*100):100,n:ppl.length,pp:hum.length,used,slots};
+ ST={inc,up,mood:ppl.length?Math.round(ok/ppl.length*100):100,n:ppl.length,pp:hum.length,tax,used,slots};
  cd-=dt;if(cd<=0&&bad.length){const e=bad[Math.random()*bad.length|0];toast(e.name+': '+(e.c==='food'||e.c==='petfood'?'Хочу '+ICO[e.want]+'!':TXT[e.c]));cd=12}}
 
 let rc=0,sv=0,last=Date.now();
 function hud(dt){
  $('rm').textContent=fmt(D.money);$('rw').textContent=fmt(D.wood);$('rs').textContent=fmt(D.stone);
- $('st').innerHTML=`😊 ${ST.mood}% · 👥 ${ST.n} · 🔨 ${ST.used}/${ST.slots} · <span class="g">+${fmt1(ST.inc)}</span> / <span class="r">−${fmt1(ST.up)}</span> 💰/с`;
+ $('st').innerHTML=`😊 ${ST.mood}% · 👥 ${ST.n} · 🔨 ${ST.used}/${ST.slots} · 🏛️ налог +${fmt1(ST.tax||0)} · <span class="g">+${fmt1(ST.inc)}</span> / <span class="r">−${fmt1(ST.up)}</span> 💰/с`;
  ['bread','meat','milk','fish','petfood'].forEach(k=>{const c=$('fc-'+k);if(c){c.textContent=D.food[k];c.parentElement.classList.toggle('empty',!D.food[k])}});
  const rb=$('rideBtn'),rt=D.autoRide?'🎢 Автокатание: '+(D.autoRideOn?'вкл':'выкл'):'🎢 Автокатание — 10000 💰 (жителей '+(ST.pp||0)+'/52)';if(rb.textContent!==rt)rb.textContent=rt;
  rc+=dt;if(rc>.6){rc=0;document.querySelectorAll('.card').forEach(el=>{const c=cost(el.dataset.k);el.classList.toggle('no',!can(c));el.querySelectorAll('.chip').forEach((ch,i)=>{const r=Object.keys(c)[i];ch.classList.toggle('lack',D[r]<c[r])})})}}
@@ -656,6 +669,10 @@ document.addEventListener('click',e=>{
  if(e.target.id==='yes'){const f=modalYes;modalYes=modalNo=null;$('modal').classList.remove('on');if(f)f();return}
  if(e.target.id==='no'||e.target.id==='modal'){const f=modalNo;modalYes=modalNo=null;$('modal').classList.remove('on');if(f)f();return}
  if(e.target.id==='autoBtn'){autoClick();return}
+ if(e.target.id==='gear'){renderSet();$('sm').classList.add('on');return}
+ const bc=e.target.closest('[data-bgc]');if(bc){D.bg.c=bc.dataset.bgc;applyBg();renderSet();save();return}
+ const bp=e.target.closest('[data-bgp]');if(bp){D.bg.p=bp.dataset.bgp;applyBg();renderSet();save();return}
+ if(e.target.id==='sx'||e.target.id==='sm'){$('sm').classList.remove('on');return}
  if(e.target.id==='rideBtn'){rideClick();return}
  if(e.target.id==='pf'){pondGuess('fish');return}
  if(e.target.id==='pe'){pondGuess('eagle');return}
@@ -677,7 +694,7 @@ document.addEventListener('click',e=>{
 });
 $('tray').innerHTML=['bread','meat','milk','fish','petfood'].map(k=>`<span class="fchip" data-f="${k}">${ICO[k]}<b id="fc-${k}">0</b></span>`).join('');
 D.ents.forEach(e=>{if(LV0[e.k]&&e.lv==null){e.lv=(D.up&&D.up[e.k])||LV0[e.k];if(e.k==='rod'&&e.hp==null)e.hp=e.lv}});
-C=counts();D.ents.forEach(mkEnt);relabel();setView('village');renderZones();autoBtn();requestAnimationFrame(()=>{vp.scrollLeft=0;vp.scrollTop=vp.scrollHeight});dailyQuote();
+C=counts();D.ents.forEach(mkEnt);relabel();setView('village');renderZones();autoBtn();applyBg();requestAnimationFrame(()=>{vp.scrollLeft=0;vp.scrollTop=vp.scrollHeight});dailyQuote();
 if(!D.ents.length)toast('Купи ратушу: 🛒 → Промышленность. Камень — в шахте, дерево — в лесу');
 </script>
 </body>
